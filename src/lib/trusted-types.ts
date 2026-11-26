@@ -5,7 +5,8 @@
  * The only such sink in the app is `new Worker(new URL('./timer.worker', import.meta.url))`
  * (src/lib/timers): the bundler needs that exact form to emit the worker, so it can't be wrapped
  * in a named policy. The default policy therefore accepts script URLs of the app's own worker
- * chunks (`/worker-*.js` on this origin) and nothing else; HTML and script strings stay blocked.
+ * chunks (`worker-*.js` or `timer.worker-*.js` on this origin) and nothing else; HTML and script
+ * strings stay blocked.
  */
 
 interface TrustedTypePolicyFactoryLike {
@@ -15,7 +16,8 @@ interface TrustedTypePolicyFactoryLike {
   ): unknown;
 }
 
-const WORKER_CHUNK = /^\/(?:.*\/)?worker-[\w-]+\.js$/;
+// `worker-[hash].js` (Angular) or `timer.worker-[hash].js` (Vite), at any depth on this origin.
+const WORKER_CHUNK = /^\/(?:.*\/)?(?:timer\.)?worker-[\w-]+\.js$/;
 
 export function allowedWorkerUrl(input: string, origin: string): string | null {
   let url: URL;

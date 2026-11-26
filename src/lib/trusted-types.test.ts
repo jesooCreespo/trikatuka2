@@ -9,12 +9,16 @@ describe('allowedWorkerUrl', () => {
     );
     expect(allowedWorkerUrl('/worker-abc_1.js', ORIGIN)).toBe(`${ORIGIN}/worker-abc_1.js`);
     expect(allowedWorkerUrl('/worker-abc.js?v=1', ORIGIN)).toBe(`${ORIGIN}/worker-abc.js?v=1`);
+    expect(allowedWorkerUrl('/assets/timer.worker-CUOj90y3.js', ORIGIN)).toBe(
+      `${ORIGIN}/assets/timer.worker-CUOj90y3.js`,
+    );
   });
 
   it('rejects everything else', () => {
     for (const input of [
       'https://evil.example/worker-AUM3Q3XG.js',
       `${ORIGIN}/main-ABC.js`,
+      `${ORIGIN}/assets/evil.worker-x.js`,
       'data:text/javascript,alert(1)',
       'blob:https://trikatuka.example/123',
       'javascript:alert(1)',
