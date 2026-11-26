@@ -2,3 +2,6 @@
 docs/angular/*.md -text
 docs/angular/*.txt -text
 docs/angular/SOURCE.md text
+# The inline theme script's SHA-256 is pinned in the CSP (firebase.json): its bytes, line endings
+# included, must be the same on every checkout.
+src/index.html text eol=lf
