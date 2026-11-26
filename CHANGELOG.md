@@ -1,0 +1,97 @@
+# Changelog
+
+All notable changes to this project are documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+Version 3.0.0 is a full rewrite. It is a major release because the stack, the build, the
+configuration and the UI flow all change.
+
+### Added
+
+- Guided six-step wizard: connect the old account, connect the new account, choose, review,
+  transfer, report.
+- Selection of individual liked songs, albums, artists and podcasts. Before, only playlists could
+  be picked one by one; everything else was "transfer all".
+- Search in every section, and a filter for playlists that will be copied or followed.
+- "Skip what the new account already has" option, on by default.
+- Live progress, overall and per section, and a button to stop the transfer.
+- Final report with per-item results, "retry failed items" and a JSON report download.
+- JSON backup of the old account's library, including the items of owned playlists.
+- Italian translation, with language selection (detected from the browser).
+- Light and dark themes (follows the system by default).
+- Automatic retry on Spotify rate limits (`429` with `Retry-After`) and server errors.
+- Unit tests (Vitest) and end-to-end tests (Playwright) against a fake Spotify.
+
+### Changed
+
+- Rewritten in React 19, TypeScript, Vite, Tailwind CSS 4 and shadcn/ui. Replaces AngularJS 1.5,
+  jQuery, UIkit 2 and Grunt.
+- Uses Spotify Web API endpoints introduced by the February 2026 migration: `PUT /me/library`
+  for saving and following, `/playlists/{id}/items` for playlist contents, and
+  `POST /me/playlists` for creating playlists.
+- Playlist copies keep their description.
+- The login popup now hands tokens to the app with a same-origin `postMessage`.
+- The Spotify client ID is configured with `VITE_SPOTIFY_CLIENT_ID` (`.env.*` files).
+- Local development runs on `http://127.0.0.1:5173` with no self-signed certificate.
+- The version shown in the footer comes from `package.json`.
+
+### Removed
+
+- `config.dev.json`, `config.prod.json`, `config/default.json.template`, `Gruntfile.js` and the
+  `certs/` folder.
+- Unused dependencies: socket.io, angular-socket-io, ngStorage, cookiesEU, keycloak-angular.
+
+### Fixed
+
+- Transfers no longer fail on endpoints that Spotify removed in February 2026.
+- Local files are skipped when copying a playlist instead of making the request fail.
+
+## [2.7.1] - 2026-03-06
+
+### Fixed
+
+- Authentication.
+
+## [2.7] - 2024-01-22
+
+### Added
+
+- Podcasts.
+- Experimental option to keep the order of liked songs.
+
+## [2.6] - 2024-09-23
+
+### Changed
+
+- The app is now fully client side.
+
+### Fixed
+
+- Transfer of tracks and albums.
+
+## [2.5]
+
+### Changed
+
+- Playlists are transferred in the same order.
+
+## [2.4]
+
+### Added
+
+- Transfer of albums and playlists.
+
+## [2.3]
+
+### Added
+
+- "Help" page.
+
+### Fixed
+
+- Moving playlists: requests are now made one by one, because concurrent requests caused
+  `500` errors.

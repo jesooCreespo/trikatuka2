@@ -1,54 +1,67 @@
-# Trikatuka - migration tool for Spotify
+# Trikatuka – migration tool for Spotify
 
-**Trikatuka** is a tool helping transfer Spotify playlists and saved tracks from one account to another.
+**Trikatuka** moves your Spotify library from one account to another: playlists, liked songs,
+albums, followed artists and podcasts.
 
-- *Collaborative* playlists are followed.
-- *Public* and *private* playlists are copied.
-- Subscribed playlists are followed.
+- Playlists you own are **copied** (name, visibility, description and songs).
+- Collaborative playlists and playlists made by others are **followed**.
+- It runs entirely in the browser; there is no backend.
 
-**Production app is available here:** https://trikatuka.aknakn.eu
+**Production app:** https://trikatuka.aknakn.eu
 
 How to: https://aknowakowski.blogspot.com/p/trikatuka2.html
 
 ## For developers
 
-Project is based on `AngularJS 1.5`
+Stack: React 19, TypeScript, Vite, Tailwind CSS 4, shadcn/ui, TanStack Query, Zustand,
+react-i18next. Tests: Vitest and Playwright.
 
-You need to create an app on https://developer.spotify.com/ and get `clientId`. You must also add `http://localhost:<PORT>/afterLogin` to the urls whitelist.
+### Spotify app setup
 
-Spotify API requires HTTPS for authentication so for local development generate self signed cert and put it in `certs` dir. For `CN` provide `localhost`
+1. Create an app on https://developer.spotify.com/dashboard and copy its **Client ID**.
+2. Add these redirect URIs:
+   - `http://127.0.0.1:5173/afterLogin` (development; Spotify only allows `http` on loopback
+     IPs, not on `localhost`)
+   - `https://<your-domain>/afterLogin` (production)
+3. Put the Client ID in `.env.development` / `.env.production`:
+
+   ```
+   VITE_SPOTIFY_CLIENT_ID=<your client id>
+   ```
+
+   For a personal override, use `.env.development.local` (gitignored).
+
+Apps in Spotify's development mode are limited to a few users, and the app owner needs Spotify
+Premium. A public deployment needs extended quota mode.
+
+### Commands
 
 ```bash
-cd certs
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout localhost.key -out localhost.crt
+npm install
+npm run dev          # http://127.0.0.1:5173
+npm run build        # type check + production build in dist/
+npm run preview      # serve dist/ on http://127.0.0.1:4173
+npm run lint
+npm run typecheck
+npm run format       # Prettier
+npm test             # unit tests (Vitest)
+npm run test:e2e     # end-to-end tests (Playwright, fake Spotify; builds first)
 ```
 
-**How to run**
-- optionally change port in `package.json` in `start` command
-- set clientId in `config.dev.json`
-- `npm install`
-- `npm start`
-- Navigate to `https://127.0.0.1:<PORT>`
+The first time, install the Playwright browser with `npx playwright install chromium`.
 
-## Changelog
+### Deploy
 
-### 2.7.1 (2026/03/06)
-- Fixed atuhentication
+```bash
+firebase deploy --only hosting   # runs npm run build first
+```
 
-### 2.7 (2024/01/22)
-- Added podcasts
-- Added experimental feature to keep favorite tracks order (please report if it fails) 
+## Versioning
 
-### 2.6 (2024/09/23)
-- Fixed tracks and albums transfer
-- App is now fully client side!
+The project follows [Semantic Versioning](https://semver.org/). Changes are recorded in
+[CHANGELOG.md](CHANGELOG.md), in the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
+format. The version in `package.json` is the one shown in the app's footer.
 
-### 2.5
-- Transfer playlists in the same order
+## License
 
-### 2.4
-- Added support for transfering albums and playlists.
-
-### 2.3
-- Fixed moving playlists. Now requests are made one by one, because posting multiple requests simultaneously caused 500 errors.
-- Added "Help" page
+[MIT](LICENSE)
