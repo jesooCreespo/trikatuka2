@@ -171,19 +171,19 @@ export class AccountCard implements OnInit {
       </p>
     }
 
-    <div class="flex justify-end">
-      <button hlmBtn (click)="wizard.goTo('select')" [disabled]="!ready()">
-        {{ i18n.t('connect.continue') }}
-        <ng-icon name="lucideArrowRight" />
-      </button>
-    </div>
-
     <div class="bg-card flex gap-3 rounded-lg border p-4 text-sm">
       <ng-icon name="lucideInfo" class="text-primary mt-0.5 shrink-0" aria-hidden="true" />
       <div class="space-y-1">
         <p class="font-medium">{{ i18n.t('connect.tipTitle') }}</p>
         <p class="text-muted-foreground">{{ i18n.t('connect.tip') }}</p>
       </div>
+    </div>
+
+    <div class="flex justify-end">
+      <button hlmBtn (click)="wizard.goTo('select')" [disabled]="!ready()">
+        {{ i18n.t('connect.continue') }}
+        <ng-icon name="lucideArrowRight" />
+      </button>
     </div>
   `,
 })
