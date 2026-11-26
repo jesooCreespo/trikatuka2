@@ -68,3 +68,9 @@ SemVer + [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Every user-vi
 ## Privacy policy
 
 `src/pages/Privacy.tsx` (route `/privacy`; `/privacypolicy.html` redirects there in the app and in `firebase.json`). It is the owner's legal text: keep it verbatim and English-only, and change the wording only when the owner asks.
+
+## Ads
+
+`src/features/ads/`: one AdSense unit (`AdBanner`, rendered above the footer in `App.tsx`). Config comes only from `VITE_ADSENSE_ENABLED` / `_CLIENT` / `_SLOT` / `_NON_PERSONALIZED` (`config.ts`, validated; invalid IDs keep ads off). Off by default in both `.env` files. When off, the component renders nothing and no Google script is injected (the main e2e asserts no `googlesyndication` request). The script is injected at runtime by `adsense.ts`, never in `index.html`. Turning ads on is the owner's decision (consent/CMP and privacy policy implications).
+
+Firebase: the local hosting emulator applies `rewrites` and `cleanUrls` but ignores `redirects` and `headers`; old URLs are therefore also handled by app routes.

@@ -4,6 +4,7 @@ import { Navigate, Route, Routes } from 'react-router'
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { Footer } from '@/components/Footer'
+import { AdBanner } from '@/features/ads/AdBanner'
 import { Header } from '@/components/Header'
 import { Wizard } from '@/features/wizard/Wizard'
 
@@ -43,9 +44,11 @@ export function App() {
             />
             {/* Old address of the policy, possibly linked from elsewhere. */}
             <Route path="/privacypolicy.html" element={<Navigate to="/privacy" replace />} />
+            <Route path="/privacypolicy" element={<Navigate to="/privacy" replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
+        <AdBanner className="mb-6" />
         <Footer />
       </div>
       <Toaster richColors closeButton position="top-center" />

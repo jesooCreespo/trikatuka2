@@ -14,6 +14,9 @@ test('transfers selected playlists and liked songs to the new account', async ({
   context,
 }) => {
   const spotify = await installFakeSpotify(context)
+  // Ads are off by default: nothing may be requested from Google.
+  const adRequests: string[] = []
+  page.on('request', (r) => r.url().includes('googlesyndication') && adRequests.push(r.url()))
   await page.goto('/')
 
   // Step 1–2: connect both accounts.
@@ -57,6 +60,8 @@ test('transfers selected playlists and liked songs to the new account', async ({
     { playlistId: 'copy-1', uris: ['spotify:track:t1', 'spotify:track:t2'] },
   ])
   expect(spotify.saved).toEqual(['spotify:playlist:theirs', 'spotify:track:t2'])
+  expect(adRequests).toEqual([])
+  await expect(page.locator('ins.adsbygoogle')).toHaveCount(0)
 })
 
 test('shows the Italian UI when the browser is in Italian', async ({ browser }) => {

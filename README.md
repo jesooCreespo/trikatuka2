@@ -60,11 +60,31 @@ npm run screenshots  # regenerate docs/screenshots/ (demo library, all languages
 
 The first time, install the Playwright browser with `npx playwright install chromium`.
 
+### Advertising (optional)
+
+The app can show one Google AdSense banner above the footer. It is **off by default**, and
+while it is off nothing is loaded from Google. It is configured in `.env.production`:
+
+```
+VITE_ADSENSE_ENABLED=true                  # false = no ads
+VITE_ADSENSE_CLIENT=ca-pub-XXXXXXXXXXXXXXXX
+VITE_ADSENSE_SLOT=XXXXXXXXXX
+VITE_ADSENSE_NON_PERSONALIZED=false        # true = non-personalized ads only
+```
+
+Rebuild and deploy after changing it. Before turning ads on for visitors in the EEA, UK or
+Switzerland, set up a consent message (a Google-certified CMP, e.g. "Privacy & messaging" in
+the AdSense account), and make sure the privacy policy matches what is enabled.
+
 ### Deploy
 
 ```bash
 firebase deploy --only hosting   # runs npm run build first
 ```
+
+`firebase emulators:start --only hosting` serves `dist/` locally with the rewrites, but the
+local emulator does not apply the `redirects` and `headers` of `firebase.json`. Check those on a
+preview channel (`firebase hosting:channel:deploy preview`).
 
 ## Adding a language
 

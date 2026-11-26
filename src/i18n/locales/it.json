@@ -169,5 +169,8 @@
     "beer": "Offrimi una birra",
     "privacy": "Privacy",
     "disclaimer": "Non affiliato a Spotify."
+  },
+  "ads": {
+    "label": "Pubblicità"
   }
 }

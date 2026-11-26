@@ -165,5 +165,8 @@
     "beer": "Buy me a beer",
     "privacy": "Privacy",
     "disclaimer": "Not affiliated with Spotify."
+  },
+  "ads": {
+    "label": "Advertisement"
   }
 }

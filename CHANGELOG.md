@@ -26,6 +26,8 @@ configuration and the UI flow all change.
   file, validated by the test suite. Each language is downloaded only when used.
 - Light and dark themes (follows the system by default).
 - Automatic retry on Spotify rate limits (`429` with `Retry-After`) and server errors.
+- Optional Google AdSense banner, off by default. It is enabled and configured with
+  `VITE_ADSENSE_*` variables; when off, no Google script is loaded.
 - Unit tests (Vitest) and end-to-end tests (Playwright) against a fake Spotify.
 
 ### Changed
