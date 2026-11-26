@@ -1,10 +1,68 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { type ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { provideRouter, withInMemoryScrolling } from '@angular/router';
+import { provideIcons } from '@ng-icons/core';
+import {
+  lucideArrowLeft,
+  lucideArrowRight,
+  lucideCheck,
+  lucideChevronLeft,
+  lucideChevronRight,
+  lucideCircleAlert,
+  lucideCircleCheck,
+  lucideDisc3,
+  lucideDownload,
+  lucideHeart,
+  lucideInbox,
+  lucideInfo,
+  lucideListMusic,
+  lucideLoaderCircle,
+  lucideLogOut,
+  lucideMicVocal,
+  lucideOctagonX,
+  lucidePencil,
+  lucidePlay,
+  lucidePlus,
+  lucidePodcast,
+  lucideRefreshCw,
+  lucideRotateCcw,
+  lucideSearch,
+  lucideSquare,
+} from '@ng-icons/lucide';
+import { provideI18n } from '@/i18n/i18n';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes)
-  ]
+    provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: 'top' })),
+    provideI18n(),
+    // Icons used across the wizard, available to every component by name.
+    provideIcons({
+      lucideArrowLeft,
+      lucideArrowRight,
+      lucideCheck,
+      lucideChevronLeft,
+      lucideChevronRight,
+      lucideCircleAlert,
+      lucideCircleCheck,
+      lucideDisc3,
+      lucideDownload,
+      lucideHeart,
+      lucideInbox,
+      lucideInfo,
+      lucideListMusic,
+      lucideLoaderCircle,
+      lucideLogOut,
+      lucideMicVocal,
+      lucideOctagonX,
+      lucidePencil,
+      lucidePlay,
+      lucidePlus,
+      lucidePodcast,
+      lucideRefreshCw,
+      lucideRotateCcw,
+      lucideSearch,
+      lucideSquare,
+    }),
+  ],
 };
