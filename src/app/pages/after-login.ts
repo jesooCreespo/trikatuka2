@@ -7,7 +7,7 @@ import { AUTH_MESSAGE_TYPE, completeLogin, type AuthMessage } from '@/lib/spotif
  */
 @Component({
   selector: 'app-after-login',
-  template: `<p class="py-10 text-center text-muted-foreground" aria-busy="true">…</p>`,
+  template: `<p class="text-muted-foreground py-10 text-center" aria-busy="true">…</p>`,
 })
 export class AfterLogin implements OnInit {
   async ngOnInit() {

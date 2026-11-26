@@ -69,14 +69,14 @@ export class Cover {
       @if (image(); as src) {
         <img hlmAvatarImage [src]="src" alt="" />
       }
-      <span hlmAvatarFallback class="bg-accent font-semibold text-accent-foreground">
+      <span hlmAvatarFallback class="bg-accent text-accent-foreground font-semibold">
         {{ name().slice(0, 1).toUpperCase() }}
       </span>
     </hlm-avatar>
     <div class="min-w-0">
       <p class="truncate font-medium">{{ name() }}</p>
       @if (profile().display_name) {
-        <p class="truncate text-xs text-muted-foreground">{{ profile().id }}</p>
+        <p class="text-muted-foreground truncate text-xs">{{ profile().id }}</p>
       }
     </div>
   `,

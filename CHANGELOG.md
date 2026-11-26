@@ -27,12 +27,14 @@ configuration and the UI flow all change.
 - Light and dark themes (follows the system by default).
 - Automatic retry on Spotify rate limits (`429` with `Retry-After`) and server errors.
 - Optional Google AdSense banner, off by default. It is enabled and configured with
-  `VITE_ADSENSE_*` variables; when off, no Google script is loaded.
-- Unit tests (Vitest) and end-to-end tests (Playwright) against a fake Spotify.
+  `adsense` settings in `src/environments/`; when off, no Google script is loaded.
+- Unit tests (Vitest) and end-to-end tests (Playwright) against a fake Spotify, including
+  automated accessibility checks (axe-core, WCAG 2.2 AA) on every step in both themes.
 
 ### Changed
 
-- Rewritten in React 19, TypeScript, Vite, Tailwind CSS 4 and shadcn/ui. Replaces AngularJS 1.5,
+- Rewritten in Angular 22 (standalone components, signals, zoneless), TypeScript, Tailwind CSS 4
+  and spartan/ui, with Transloco for translations. Replaces AngularJS 1.5,
   jQuery, UIkit 2 and Grunt.
 - Uses Spotify Web API endpoints introduced by the February 2026 migration: `PUT /me/library`
   for saving and following, `/playlists/{id}/items` for playlist contents, and
@@ -41,8 +43,9 @@ configuration and the UI flow all change.
 - The login popup now hands tokens to the app with a same-origin `postMessage`.
 - The privacy policy is a page of the app (`/privacy`), with its header, theme and language
   menu. The old `/privacypolicy.html` address redirects to it. The text is unchanged.
-- The Spotify client ID is configured with `VITE_SPOTIFY_CLIENT_ID` (`.env.*` files).
-- Local development runs on `http://127.0.0.1:5173` with no self-signed certificate.
+- The Spotify client ID is configured in `src/environments/`.
+- Local development runs on `http://127.0.0.1:4200` with no self-signed certificate.
+- The OAuth callback `/afterLogin` is a route of the app instead of a separate page.
 - The version shown in the footer comes from `package.json`.
 
 ### Removed

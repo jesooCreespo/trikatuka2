@@ -1,35 +1,35 @@
-import type { SpotifyApi } from './spotify/endpoints'
-import { fetchAllCursor, fetchAllOffset, type ProgressFn } from './spotify/paginate'
-import type { Image, Playlist } from './spotify/types'
+import type { SpotifyApi } from './spotify/endpoints';
+import { fetchAllCursor, fetchAllOffset, type ProgressFn } from './spotify/paginate';
+import type { Image, Playlist } from './spotify/types';
 
-export const CATEGORIES = ['playlists', 'tracks', 'albums', 'artists', 'shows'] as const
-export type Category = (typeof CATEGORIES)[number]
+export const CATEGORIES = ['playlists', 'tracks', 'albums', 'artists', 'shows'] as const;
+export type Category = (typeof CATEGORIES)[number];
 
 export interface PlaylistMeta {
-  ownerId: string
-  ownerName: string | null
-  collaborative: boolean
-  isPublic: boolean
-  description: string | null
-  itemCount: number | null
+  ownerId: string;
+  ownerName: string | null;
+  collaborative: boolean;
+  isPublic: boolean;
+  description: string | null;
+  itemCount: number | null;
 }
 
 /** A normalized entry of the source library, whatever its type. */
 export interface LibraryItem {
-  category: Category
-  id: string
-  uri: string
-  name: string
-  subtitle: string
-  imageUrl: string | null
-  playlist?: PlaylistMeta
+  category: Category;
+  id: string;
+  uri: string;
+  name: string;
+  subtitle: string;
+  imageUrl: string | null;
+  playlist?: PlaylistMeta;
 }
 
 function smallestImage(images: Image[] | null | undefined): string | null {
-  if (!images?.length) return null
-  const sorted = [...images].sort((a, b) => (a.width ?? 0) - (b.width ?? 0))
+  if (!images?.length) return null;
+  const sorted = [...images].sort((a, b) => (a.width ?? 0) - (b.width ?? 0));
   // Prefer the smallest image that's still at least 64px wide.
-  return (sorted.find((img) => (img.width ?? 0) >= 64) ?? sorted[sorted.length - 1])?.url ?? null
+  return (sorted.find((img) => (img.width ?? 0) >= 64) ?? sorted[sorted.length - 1])?.url ?? null;
 }
 
 export function playlistToItem(p: Playlist): LibraryItem {
@@ -48,7 +48,7 @@ export function playlistToItem(p: Playlist): LibraryItem {
       description: p.description,
       itemCount: p.items?.total ?? p.tracks?.total ?? null,
     },
-  }
+  };
 }
 
 /**
@@ -63,12 +63,12 @@ export async function loadCategory(
 ): Promise<LibraryItem[]> {
   switch (category) {
     case 'playlists': {
-      const playlists = await fetchAllOffset((o) => api.myPlaylists(o, signal), onProgress)
+      const playlists = await fetchAllOffset((o) => api.myPlaylists(o, signal), onProgress);
       // Spotify can return null entries for playlists that are no longer available.
-      return playlists.filter(Boolean).map(playlistToItem)
+      return playlists.filter(Boolean).map(playlistToItem);
     }
     case 'tracks': {
-      const saved = await fetchAllOffset((o) => api.savedTracks(o, signal), onProgress)
+      const saved = await fetchAllOffset((o) => api.savedTracks(o, signal), onProgress);
       return saved
         .filter((s) => s.track?.id && !s.track.is_local)
         .map(({ track }) => ({
@@ -80,10 +80,10 @@ export async function loadCategory(
             .filter(Boolean)
             .join(' · '),
           imageUrl: smallestImage(track.album?.images),
-        }))
+        }));
     }
     case 'albums': {
-      const saved = await fetchAllOffset((o) => api.savedAlbums(o, signal), onProgress)
+      const saved = await fetchAllOffset((o) => api.savedAlbums(o, signal), onProgress);
       return saved.map(({ album }) => ({
         category,
         id: album.id,
@@ -91,13 +91,13 @@ export async function loadCategory(
         name: album.name,
         subtitle: album.artists.map((a) => a.name).join(', '),
         imageUrl: smallestImage(album.images),
-      }))
+      }));
     }
     case 'artists': {
       const artists = await fetchAllCursor(
         (after) => api.followedArtists(after, signal),
         onProgress,
-      )
+      );
       return artists.map((artist) => ({
         category,
         id: artist.id,
@@ -105,10 +105,10 @@ export async function loadCategory(
         name: artist.name,
         subtitle: '',
         imageUrl: smallestImage(artist.images),
-      }))
+      }));
     }
     case 'shows': {
-      const saved = await fetchAllOffset((o) => api.savedShows(o, signal), onProgress)
+      const saved = await fetchAllOffset((o) => api.savedShows(o, signal), onProgress);
       return saved.map(({ show }) => ({
         category,
         id: show.id,
@@ -116,21 +116,21 @@ export async function loadCategory(
         name: show.name,
         subtitle: '',
         imageUrl: smallestImage(show.images),
-      }))
+      }));
     }
   }
 }
 
 /** Playlists the source user owns (and that aren't collaborative) are copied; others followed. */
 export function playlistAction(item: LibraryItem, sourceUserId: string): 'copy' | 'follow' {
-  const meta = item.playlist
-  if (!meta) return 'follow'
-  return !meta.collaborative && meta.ownerId === sourceUserId ? 'copy' : 'follow'
+  const meta = item.playlist;
+  if (!meta) return 'follow';
+  return !meta.collaborative && meta.ownerId === sourceUserId ? 'copy' : 'follow';
 }
 
 /** Case/whitespace-insensitive search over name and subtitle. */
 export function matchesSearch(item: LibraryItem, query: string): boolean {
-  const q = query.trim().toLocaleLowerCase()
-  if (!q) return true
-  return `${item.name} ${item.subtitle}`.toLocaleLowerCase().includes(q)
+  const q = query.trim().toLocaleLowerCase();
+  if (!q) return true;
+  return `${item.name} ${item.subtitle}`.toLocaleLowerCase().includes(q);
 }

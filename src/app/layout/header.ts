@@ -1,7 +1,13 @@
 import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { lucideCircleHelp, lucideLanguages, lucideMonitor, lucideMoon, lucideSun } from '@ng-icons/lucide';
+import {
+  lucideCircleHelp,
+  lucideLanguages,
+  lucideMonitor,
+  lucideMoon,
+  lucideSun,
+} from '@ng-icons/lucide';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmDropdownMenuImports } from '@spartan-ng/helm/dropdown-menu';
 import { Theme, type ThemePreference } from '@/app/core/theme';
@@ -11,7 +17,9 @@ import { Logo } from './logo';
 @Component({
   selector: 'app-header',
   imports: [RouterLink, NgIcon, Logo, HlmButtonImports, HlmDropdownMenuImports],
-  providers: [provideIcons({ lucideCircleHelp, lucideLanguages, lucideMonitor, lucideMoon, lucideSun })],
+  providers: [
+    provideIcons({ lucideCircleHelp, lucideLanguages, lucideMonitor, lucideMoon, lucideSun }),
+  ],
   host: {
     class:
       'sticky top-0 z-30 block border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60',
@@ -21,19 +29,15 @@ import { Logo } from './logo';
       <a routerLink="/" class="flex items-center gap-2.5 rounded-md font-semibold tracking-tight">
         <app-logo class="size-7" />
         <span>Trikatuka</span>
-        <span class="hidden text-sm font-normal text-muted-foreground sm:inline">
+        <span class="text-muted-foreground hidden text-sm font-normal sm:inline">
           {{ i18n.t('app.tagline') }}
         </span>
       </a>
       <div class="ml-auto flex items-center gap-1">
-        <button
-          hlmBtn
-          variant="ghost"
-          size="sm"
-          [hlmDropdownMenuTrigger]="languageMenu"
-          [attr.aria-label]="i18n.t('app.language')"
-        >
-          <ng-icon name="lucideLanguages" />
+        <button hlmBtn variant="ghost" size="sm" [hlmDropdownMenuTrigger]="languageMenu">
+          <ng-icon name="lucideLanguages" aria-hidden="true" />
+          <!-- The accessible name includes the visible code ("Language: en"). -->
+          <span class="sr-only">{{ i18n.t('app.language') }}:</span>
           <span class="uppercase">{{ i18n.lang() }}</span>
         </button>
         <ng-template #languageMenu>
@@ -77,7 +81,13 @@ import { Logo } from './logo';
           </hlm-dropdown-menu>
         </ng-template>
 
-        <a hlmBtn variant="ghost" size="icon" routerLink="/help" [attr.aria-label]="i18n.t('app.help')">
+        <a
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          routerLink="/help"
+          [attr.aria-label]="i18n.t('app.help')"
+        >
           <ng-icon name="lucideCircleHelp" />
         </a>
       </div>

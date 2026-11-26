@@ -11,14 +11,7 @@ import { CategoryIcon } from './shared';
 
 @Component({
   selector: 'app-step-select',
-  imports: [
-    NgIcon,
-    HlmBadgeImports,
-    HlmButtonImports,
-    HlmTabsImports,
-    CategoryPanel,
-    CategoryIcon,
-  ],
+  imports: [NgIcon, HlmBadgeImports, HlmButtonImports, HlmTabsImports, CategoryPanel, CategoryIcon],
   host: { class: 'block space-y-6' },
   template: `
     <div class="space-y-1">
@@ -54,13 +47,13 @@ import { CategoryIcon } from './shared';
     </hlm-tabs>
 
     <div
-      class="sticky bottom-0 -mx-4 flex items-center justify-between gap-3 border-t bg-background/90 px-4 py-3 backdrop-blur"
+      class="bg-background/90 sticky bottom-0 -mx-4 flex items-center justify-between gap-3 border-t px-4 py-3 backdrop-blur"
     >
       <button hlmBtn variant="ghost" (click)="wizard.goTo('connect-new')">
         <ng-icon name="lucideArrowLeft" />
         {{ i18n.t('connect.back') }}
       </button>
-      <span class="text-sm text-muted-foreground tabular-nums" aria-live="polite">
+      <span class="text-muted-foreground text-sm tabular-nums" aria-live="polite">
         {{
           wizard.selectionCount() > 0
             ? i18n.tn('select.totalSelected', wizard.selectionCount())

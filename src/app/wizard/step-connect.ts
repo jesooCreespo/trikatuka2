@@ -25,9 +25,11 @@ import { AccountChip } from './shared';
       </div>
       <div hlmCardContent class="space-y-4">
         @if (account(); as acc) {
-          <div class="flex items-center justify-between gap-3 rounded-lg border bg-muted/40 p-3">
+          <div class="bg-muted/40 flex items-center justify-between gap-3 rounded-lg border p-3">
             <div class="min-w-0">
-              <p class="mb-1.5 text-xs text-muted-foreground">{{ i18n.t('connect.connectedAs') }}</p>
+              <p class="text-muted-foreground mb-1.5 text-xs">
+                {{ i18n.t('connect.connectedAs') }}
+              </p>
               <app-account-chip [profile]="acc.profile" />
             </div>
             <button hlmBtn variant="outline" size="sm" (click)="session.signOut(slot())">
@@ -52,13 +54,13 @@ import { AccountChip } from './shared';
         @if (sameAsOther()) {
           <p
             role="alert"
-            class="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
+            class="border-destructive/40 bg-destructive/10 text-destructive rounded-lg border p-3 text-sm"
           >
             {{ i18n.t('connect.sameAccount') }}
           </p>
         }
         @if (error() && !account()) {
-          <p role="alert" class="text-sm text-destructive">{{ error() }}</p>
+          <p role="alert" class="text-destructive text-sm">{{ error() }}</p>
         }
       </div>
       <div hlmCardFooter class="justify-between gap-2">
@@ -82,8 +84,8 @@ import { AccountChip } from './shared';
     </section>
 
     @if (!isOld()) {
-      <div class="flex gap-3 rounded-lg border bg-card p-4 text-sm">
-        <ng-icon name="lucideInfo" class="mt-0.5 shrink-0 text-primary" aria-hidden="true" />
+      <div class="bg-card flex gap-3 rounded-lg border p-4 text-sm">
+        <ng-icon name="lucideInfo" class="text-primary mt-0.5 shrink-0" aria-hidden="true" />
         <div class="space-y-1">
           <p class="font-medium">{{ i18n.t('connect.tipTitle') }}</p>
           <p class="text-muted-foreground">{{ i18n.t('connect.tip') }}</p>

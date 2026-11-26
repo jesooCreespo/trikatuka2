@@ -5,7 +5,6 @@ import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmCheckboxImports } from '@spartan-ng/helm/checkbox';
 import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmProgressImports } from '@spartan-ng/helm/progress';
-import { HlmTabsImports } from '@spartan-ng/helm/tabs';
 import { HlmTooltipImports } from '@spartan-ng/helm/tooltip';
 import { LibraryStore } from '@/app/core/library-store';
 import { Session } from '@/app/core/session';
@@ -27,16 +26,12 @@ type PlaylistFilter = 'all' | 'copy' | 'follow';
   },
   template: `
     <label [attr.for]="id()" class="flex cursor-pointer items-center gap-3 px-3 py-2.5">
-      <hlm-checkbox
-        [inputId]="id()"
-        [checked]="checked()"
-        (checkedChange)="toggled.emit($event)"
-      />
+      <hlm-checkbox [inputId]="id()" [checked]="checked()" (checkedChange)="toggled.emit($event)" />
       <app-cover [item]="item()" class="size-11" />
       <span class="min-w-0 flex-1">
         <span class="block truncate font-medium">{{ item().name }}</span>
         @if (details()) {
-          <span class="block truncate text-sm text-muted-foreground">{{ details() }}</span>
+          <span class="text-muted-foreground block truncate text-sm">{{ details() }}</span>
         }
       </span>
       @if (action(); as a) {
@@ -71,19 +66,12 @@ export class ItemRow {
 
 @Component({
   selector: 'app-category-panel',
-  imports: [
-    NgIcon,
-    HlmButtonImports,
-    HlmInputImports,
-    HlmProgressImports,
-    HlmTabsImports,
-    ItemRow,
-  ],
+  imports: [NgIcon, HlmButtonImports, HlmInputImports, HlmProgressImports, ItemRow],
   host: { class: 'block space-y-3' },
   template: `
     @switch (state().status) {
       @case ('error') {
-        <div class="flex flex-col items-center gap-3 rounded-xl border bg-card p-10 text-center">
+        <div class="bg-card flex flex-col items-center gap-3 rounded-xl border p-10 text-center">
           <p class="text-destructive">{{ i18n.t('select.loadError') }}</p>
           <button hlmBtn variant="outline" (click)="library.refresh(category())">
             <ng-icon name="lucideRefreshCw" />
@@ -96,7 +84,7 @@ export class ItemRow {
           <div class="relative min-w-52 flex-1">
             <ng-icon
               name="lucideSearch"
-              class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
+              class="text-muted-foreground pointer-events-none absolute top-1/2 left-3 -translate-y-1/2"
               aria-hidden="true"
             />
             <input
@@ -110,13 +98,27 @@ export class ItemRow {
             />
           </div>
           @if (category() === 'playlists') {
-            <hlm-tabs [tab]="filter()" (tabActivated)="setFilter($any($event))">
-              <hlm-tabs-list>
-                <button hlmTabsTrigger="all">{{ i18n.t('select.filterAll') }}</button>
-                <button hlmTabsTrigger="copy">{{ i18n.t('select.filterCopy') }}</button>
-                <button hlmTabsTrigger="follow">{{ i18n.t('select.filterFollow') }}</button>
-              </hlm-tabs-list>
-            </hlm-tabs>
+            <!-- A filter, not tabs (there are no panels): toggle buttons in a labelled group. -->
+            <div
+              role="group"
+              [attr.aria-label]="i18n.t('categories.playlists')"
+              class="bg-muted inline-flex h-9 items-center rounded-lg p-[3px]"
+            >
+              @for (option of filters; track option.value) {
+                <button
+                  type="button"
+                  class="focus-visible:ring-ring/50 h-full rounded-md px-3 text-sm font-medium transition-colors focus-visible:ring-3 focus-visible:outline-none"
+                  [class.bg-background]="filter() === option.value"
+                  [class.shadow-sm]="filter() === option.value"
+                  [class.text-foreground]="filter() === option.value"
+                  [class.text-muted-foreground]="filter() !== option.value"
+                  [attr.aria-pressed]="filter() === option.value"
+                  (click)="setFilter(option.value)"
+                >
+                  {{ i18n.t(option.label) }}
+                </button>
+              }
+            </div>
           }
           <button
             hlmBtn
@@ -150,7 +152,7 @@ export class ItemRow {
 
         @if (pageItems().length === 0) {
           <div
-            class="flex flex-col items-center gap-2 rounded-xl border border-dashed p-10 text-center text-muted-foreground"
+            class="text-muted-foreground flex flex-col items-center gap-2 rounded-xl border border-dashed p-10 text-center"
           >
             <ng-icon name="lucideInbox" class="text-3xl" aria-hidden="true" />
             <p>
@@ -162,7 +164,7 @@ export class ItemRow {
             </p>
           </div>
         } @else {
-          <ul class="divide-y overflow-hidden rounded-xl border bg-card">
+          <ul class="bg-card divide-y overflow-hidden rounded-xl border">
             @for (item of pageItems(); track item.id) {
               <li>
                 <app-item-row
@@ -178,7 +180,7 @@ export class ItemRow {
 
         @if (pages() > 1) {
           <div class="flex items-center justify-end gap-2 text-sm">
-            <span class="mr-2 text-muted-foreground tabular-nums">
+            <span class="text-muted-foreground mr-2 tabular-nums">
               {{ i18n.t('select.page', { page: currentPage(), pages: pages() }) }}
             </span>
             <button
@@ -205,22 +207,25 @@ export class ItemRow {
         }
       }
       @default {
-        <div class="space-y-3 rounded-xl border bg-card p-6" role="status">
-          <p class="text-sm text-muted-foreground">
+        <div class="bg-card space-y-3 rounded-xl border p-6" role="status">
+          <p class="text-muted-foreground text-sm">
             {{
               state().progress
                 ? i18n.t('select.loading', state().progress!)
                 : i18n.t('select.loadingStart')
             }}
           </p>
-          <hlm-progress [value]="progressPercent()" [attr.aria-label]="i18n.t('select.loadingStart')">
+          <hlm-progress
+            [value]="progressPercent()"
+            [attr.aria-label]="i18n.t('select.loadingStart')"
+          >
             <hlm-progress-indicator />
           </hlm-progress>
           <div class="space-y-2 pt-2" aria-hidden="true">
             @for (n of skeleton; track n) {
               <div class="flex items-center gap-3">
-                <div class="size-11 animate-pulse rounded-md bg-muted"></div>
-                <div class="h-4 flex-1 animate-pulse rounded bg-muted"></div>
+                <div class="bg-muted size-11 animate-pulse rounded-md"></div>
+                <div class="bg-muted h-4 flex-1 animate-pulse rounded"></div>
               </div>
             }
           </div>
@@ -238,6 +243,11 @@ export class CategoryPanel implements OnInit {
   readonly category = input.required<Category>();
 
   protected readonly skeleton = [1, 2, 3, 4, 5];
+  protected readonly filters: { value: PlaylistFilter; label: string }[] = [
+    { value: 'all', label: 'select.filterAll' },
+    { value: 'copy', label: 'select.filterCopy' },
+    { value: 'follow', label: 'select.filterFollow' },
+  ];
   protected readonly query = signal('');
   protected readonly filter = signal<PlaylistFilter>('all');
   protected readonly page = signal(1);
@@ -251,8 +261,7 @@ export class CategoryPanel implements OnInit {
     const query = this.query();
     const filter = this.filter();
     return this.state().items.filter(
-      (item) =>
-        matchesSearch(item, query) && (filter === 'all' || this.actionOf(item) === filter),
+      (item) => matchesSearch(item, query) && (filter === 'all' || this.actionOf(item) === filter),
     );
   });
   protected readonly pages = computed(() =>

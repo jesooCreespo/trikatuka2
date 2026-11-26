@@ -34,7 +34,7 @@ import { AccountChip, accountName, CategoryIcon } from './shared';
       <div class="grid items-center gap-3 sm:grid-cols-[1fr_auto_1fr]">
         <section hlmCard class="py-4">
           <div hlmCardContent class="space-y-1.5 px-4">
-            <p class="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+            <p class="text-muted-foreground text-xs font-medium tracking-wide uppercase">
               {{ i18n.t('review.from') }}
             </p>
             @if (accounts.old; as old) {
@@ -44,12 +44,12 @@ import { AccountChip, accountName, CategoryIcon } from './shared';
         </section>
         <ng-icon
           name="lucideArrowRight"
-          class="mx-auto rotate-90 text-xl text-primary sm:rotate-0"
+          class="text-primary mx-auto rotate-90 text-xl sm:rotate-0"
           aria-hidden="true"
         />
         <section hlmCard class="py-4">
           <div hlmCardContent class="space-y-1.5 px-4">
-            <p class="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+            <p class="text-muted-foreground text-xs font-medium tracking-wide uppercase">
               {{ i18n.t('review.to') }}
             </p>
             @if (accounts.new; as target) {
@@ -75,16 +75,21 @@ import { AccountChip, accountName, CategoryIcon } from './shared';
           @for (category of categories; track category) {
             <li
               class="flex items-center gap-3 rounded-lg border p-3"
-              [class.opacity-50]="countOf(category) === 0"
+              [class.border-dashed]="countOf(category) === 0"
             >
-              <span class="grid size-9 place-items-center rounded-md bg-accent text-accent-foreground">
+              <span
+                class="bg-accent text-accent-foreground grid size-9 place-items-center rounded-md"
+              >
                 <app-category-icon [category]="category" />
               </span>
               <div>
-                <p class="text-lg leading-tight font-semibold tabular-nums">
+                <p
+                  class="text-lg leading-tight font-semibold tabular-nums"
+                  [class.text-muted-foreground]="countOf(category) === 0"
+                >
                   {{ countOf(category) }}
                 </p>
-                <p class="text-sm text-muted-foreground">
+                <p class="text-muted-foreground text-sm">
                   {{ i18n.t('categories.' + category) }}
                   @if (category === 'playlists' && countOf(category) > 0) {
                     ·
@@ -111,7 +116,7 @@ import { AccountChip, accountName, CategoryIcon } from './shared';
         <div class="flex items-start justify-between gap-4">
           <label for="opt-skip" class="space-y-0.5">
             <span class="block font-medium">{{ i18n.t('review.skipDuplicates') }}</span>
-            <span class="block text-sm text-muted-foreground">{{
+            <span class="text-muted-foreground block text-sm">{{
               i18n.t('review.skipDuplicatesHint')
             }}</span>
           </label>
@@ -124,7 +129,7 @@ import { AccountChip, accountName, CategoryIcon } from './shared';
         <div class="flex items-start justify-between gap-4">
           <label for="opt-order" class="space-y-0.5" [class.opacity-50]="trackCount() === 0">
             <span class="block font-medium">{{ i18n.t('review.keepOrder') }}</span>
-            <span class="block text-sm text-muted-foreground">{{
+            <span class="text-muted-foreground block text-sm">{{
               i18n.t('review.keepOrderHint', { minutes: keepOrderMinutes() })
             }}</span>
           </label>
@@ -170,9 +175,7 @@ import { AccountChip, accountName, CategoryIcon } from './shared';
           <hlm-alert-dialog-header>
             <h2 hlmAlertDialogTitle>{{ i18n.t('review.confirmTitle') }}</h2>
             <p hlmAlertDialogDescription>
-              {{
-                i18n.tn('review.confirmBody', wizard.selectionCount(), { name: targetName() })
-              }}
+              {{ i18n.tn('review.confirmBody', wizard.selectionCount(), { name: targetName() }) }}
             </p>
           </hlm-alert-dialog-header>
           <hlm-alert-dialog-footer>
@@ -201,7 +204,9 @@ export class StepReview {
 
   private readonly items = computed(() => this.wizard.selectedItems());
   protected readonly trackCount = computed(() => this.items().tracks?.length ?? 0);
-  protected readonly keepOrderMinutes = computed(() => Math.max(1, Math.ceil(this.trackCount() / 60)));
+  protected readonly keepOrderMinutes = computed(() =>
+    Math.max(1, Math.ceil(this.trackCount() / 60)),
+  );
   protected readonly copyCount = computed(() => {
     const source = this.session.accounts().old?.profile.id ?? '';
     return (this.items().playlists ?? []).filter((p) => playlistAction(p, source) === 'copy')
@@ -225,8 +230,12 @@ export class StepReview {
       const { buildBackup } = await import('@/transfer/export');
       const library: Partial<Record<Category, LibraryItem[]>> = {};
       for (const c of CATEGORIES) library[c] = await this.library.load(c);
-      const backup = await buildBackup(library, old.profile, this.session.api('old'), version, (done, total) =>
-        this.exporting.set({ done, total }),
+      const backup = await buildBackup(
+        library,
+        old.profile,
+        this.session.api('old'),
+        version,
+        (done, total) => this.exporting.set({ done, total }),
       );
       const date = new Date().toISOString().slice(0, 10);
       downloadJson(backup, `trikatuka-backup-${old.profile.id}-${date}.json`);

@@ -6,9 +6,10 @@ import { I18n } from '@/i18n/i18n';
 @Component({
   selector: 'app-stepper',
   imports: [NgIcon],
+  host: { class: 'block' },
   template: `
     <nav [attr.aria-label]="progress()">
-      <p class="mb-2 text-xs font-medium text-muted-foreground sm:hidden">
+      <p class="text-muted-foreground mb-2 text-xs font-medium sm:hidden">
         {{ progress() }} · {{ i18n.t('steps.' + current()) }}
       </p>
       <ol class="flex items-center gap-1.5 sm:gap-2">

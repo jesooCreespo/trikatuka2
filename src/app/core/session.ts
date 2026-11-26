@@ -60,7 +60,9 @@ export function apiForAuth(auth: AuthData): SpotifyApi {
     createSpotifyClient({
       getAuth: () => current,
       setAuth: (fresh) => (current = fresh),
-      onAuthLost: () => {},
+      onAuthLost: () => {
+        // Not stored yet: nothing to sign out.
+      },
     }),
   );
 }

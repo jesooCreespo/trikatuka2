@@ -1,5 +1,5 @@
-import { defineConfig, devices } from '@playwright/test'
-import base from './playwright.config'
+import { defineConfig, devices } from '@playwright/test';
+import base from './playwright.config';
 
 /** Demo screenshots: `npm run screenshots` writes them to docs/screenshots/. */
 export default defineConfig({
@@ -8,4 +8,4 @@ export default defineConfig({
   retries: 0,
   reporter: 'line',
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
-})
+});

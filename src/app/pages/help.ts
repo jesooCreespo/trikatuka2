@@ -18,7 +18,7 @@ import { I18n } from '@/i18n/i18n';
     </a>
     <div class="space-y-2">
       <h1 class="text-3xl font-semibold tracking-tight">{{ i18n.t('help.title') }}</h1>
-      <p class="max-w-prose text-muted-foreground">{{ i18n.t('help.intro') }}</p>
+      <p class="text-muted-foreground max-w-prose">{{ i18n.t('help.intro') }}</p>
     </div>
 
     <div class="grid gap-4 md:grid-cols-2">

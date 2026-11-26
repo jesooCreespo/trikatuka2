@@ -1,5 +1,5 @@
-import { environment } from '../../environments/environment'
-import type { AuthData, Slot } from './types'
+import { environment } from '../../environments/environment';
+import type { AuthData, Slot } from './types';
 
 /**
  * Spotify Authorization Code flow with PKCE. The app has no backend, so it can't keep a
@@ -25,51 +25,51 @@ export const SCOPES = [
   'playlist-modify-private',
   'user-follow-read',
   'user-follow-modify',
-]
+];
 
-const ACCOUNTS_URL = 'https://accounts.spotify.com'
-const PKCE_KEY = (slot: Slot) => `trikatuka:pkce:${slot}`
-export const AUTH_MESSAGE_TYPE = 'trikatuka:spotify-auth'
+const ACCOUNTS_URL = 'https://accounts.spotify.com';
+const PKCE_KEY = (slot: Slot) => `trikatuka:pkce:${slot}`;
+export const AUTH_MESSAGE_TYPE = 'trikatuka:spotify-auth';
 
 export type AuthMessage =
   | { type: typeof AUTH_MESSAGE_TYPE; slot: Slot; auth: AuthData }
-  | { type: typeof AUTH_MESSAGE_TYPE; slot: Slot | null; error: string }
+  | { type: typeof AUTH_MESSAGE_TYPE; slot: Slot | null; error: string };
 
 export function getClientId(): string {
-  const id = environment.spotifyClientId
-  if (!id) throw new Error('spotifyClientId is not set in src/environments')
-  return id
+  const id = environment.spotifyClientId;
+  if (!id) throw new Error('spotifyClientId is not set in src/environments');
+  return id;
 }
 
 export function getRedirectUri(origin = window.location.origin): string {
-  return `${origin}/afterLogin`
+  return `${origin}/afterLogin`;
 }
 
 function randomString(length: number): string {
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~'
-  const bytes = crypto.getRandomValues(new Uint8Array(length))
-  return Array.from(bytes, (b) => alphabet[b % alphabet.length]).join('')
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+  const bytes = crypto.getRandomValues(new Uint8Array(length));
+  return Array.from(bytes, (b) => alphabet[b % alphabet.length]).join('');
 }
 
 export async function codeChallenge(verifier: string): Promise<string> {
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier))
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier));
   return btoa(String.fromCharCode(...new Uint8Array(digest)))
     .replace(/=/g, '')
     .replace(/\+/g, '-')
-    .replace(/\//g, '_')
+    .replace(/\//g, '_');
 }
 
 export interface PreparedLogin {
-  slot: Slot
-  verifier: string
-  state: string
-  url: string
+  slot: Slot;
+  verifier: string;
+  state: string;
+  url: string;
 }
 
 /** Computes everything a login needs. No side effects; each result must be used only once. */
 export async function prepareLogin(slot: Slot): Promise<PreparedLogin> {
-  const verifier = randomString(128)
-  const state = `${slot}.${randomString(16)}`
+  const verifier = randomString(128);
+  const state = `${slot}.${randomString(16)}`;
   const params = new URLSearchParams({
     client_id: getClientId(),
     response_type: 'code',
@@ -80,13 +80,13 @@ export async function prepareLogin(slot: Slot): Promise<PreparedLogin> {
     scope: SCOPES.join(' '),
     // Always show the consent dialog so the user can notice which account is signed in.
     show_dialog: 'true',
-  })
-  return { slot, verifier, state, url: `${ACCOUNTS_URL}/authorize?${params.toString()}` }
+  });
+  return { slot, verifier, state, url: `${ACCOUNTS_URL}/authorize?${params.toString()}` };
 }
 
 /** Stores verifier + state where the popup's `completeLogin` will find them. */
 export function savePendingLogin({ slot, verifier, state }: PreparedLogin) {
-  sessionStorage.setItem(PKCE_KEY(slot), JSON.stringify({ verifier, state }))
+  sessionStorage.setItem(PKCE_KEY(slot), JSON.stringify({ verifier, state }));
 }
 
 /**
@@ -94,47 +94,51 @@ export function savePendingLogin({ slot, verifier, state }: PreparedLogin) {
  * Must be called synchronously from the click handler (no `await` before it).
  */
 export function startLogin(prepared: PreparedLogin): Promise<AuthData> {
-  const { slot } = prepared
-  savePendingLogin(prepared)
+  const { slot } = prepared;
+  savePendingLogin(prepared);
   // A unique name per attempt: reusing an already open popup would keep its old sessionStorage.
-  const popup = window.open(prepared.url, `spotify-login-${prepared.state}`, 'width=520,height=760')
+  const popup = window.open(
+    prepared.url,
+    `spotify-login-${prepared.state}`,
+    'width=520,height=760',
+  );
   if (!popup) {
-    sessionStorage.removeItem(PKCE_KEY(slot))
-    return Promise.reject(new Error('popup-blocked'))
+    sessionStorage.removeItem(PKCE_KEY(slot));
+    return Promise.reject(new Error('popup-blocked'));
   }
 
   return new Promise<AuthData>((resolve, reject) => {
     const cleanup = () => {
-      window.removeEventListener('message', onMessage)
-      clearInterval(closedPoll)
+      window.removeEventListener('message', onMessage);
+      clearInterval(closedPoll);
       // The popup has its own copy; the opener's one is no longer needed.
-      sessionStorage.removeItem(PKCE_KEY(slot))
-    }
+      sessionStorage.removeItem(PKCE_KEY(slot));
+    };
     const onMessage = (event: MessageEvent<AuthMessage>) => {
-      if (event.origin !== window.location.origin) return
-      const data = event.data
-      if (data?.type !== AUTH_MESSAGE_TYPE || (data.slot !== slot && data.slot !== null)) return
-      cleanup()
-      if ('error' in data) reject(new Error(data.error))
-      else resolve(data.auth)
-    }
+      if (event.origin !== window.location.origin) return;
+      const data = event.data;
+      if (data?.type !== AUTH_MESSAGE_TYPE || (data.slot !== slot && data.slot !== null)) return;
+      cleanup();
+      if ('error' in data) reject(new Error(data.error));
+      else resolve(data.auth);
+    };
     const closedPoll = setInterval(() => {
       if (popup.closed) {
-        cleanup()
-        reject(new Error('popup-closed'))
+        cleanup();
+        reject(new Error('popup-closed'));
       }
-    }, 500)
-    window.addEventListener('message', onMessage)
-  })
+    }, 500);
+    window.addEventListener('message', onMessage);
+  });
 }
 
 interface TokenResponse {
-  access_token: string
-  refresh_token?: string
-  expires_in: number
-  scope: string
-  error?: string
-  error_description?: string
+  access_token: string;
+  refresh_token?: string;
+  expires_in: number;
+  scope: string;
+  error?: string;
+  error_description?: string;
 }
 
 async function postToken(
@@ -145,12 +149,12 @@ async function postToken(
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams(body),
-  })
-  const json = (await res.json()) as TokenResponse
+  });
+  const json = (await res.json()) as TokenResponse;
   if (!res.ok || json.error) {
-    throw new Error(json.error_description || json.error || `token-request-failed-${res.status}`)
+    throw new Error(json.error_description || json.error || `token-request-failed-${res.status}`);
   }
-  return json
+  return json;
 }
 
 function toAuthData(json: TokenResponse, previousRefreshToken = '', now = Date.now()): AuthData {
@@ -160,7 +164,7 @@ function toAuthData(json: TokenResponse, previousRefreshToken = '', now = Date.n
     refreshToken: json.refresh_token ?? previousRefreshToken,
     expiresAt: now + json.expires_in * 1000,
     scope: json.scope,
-  }
+  };
 }
 
 /** Handles the redirect on `/afterLogin`: validates state and exchanges the code. */
@@ -168,24 +172,24 @@ export async function completeLogin(
   url: string,
   fetchImpl: typeof fetch = fetch,
 ): Promise<{ slot: Slot; auth: AuthData }> {
-  const params = new URL(url).searchParams
-  const state = params.get('state') ?? ''
-  const slot = state.split('.')[0]
-  if (slot !== 'old' && slot !== 'new') throw new Error('invalid-state')
+  const params = new URL(url).searchParams;
+  const state = params.get('state') ?? '';
+  const slot = state.split('.')[0];
+  if (slot !== 'old' && slot !== 'new') throw new Error('invalid-state');
 
-  const error = params.get('error')
-  if (error) throw Object.assign(new Error(error), { slot })
+  const error = params.get('error');
+  if (error) throw Object.assign(new Error(error), { slot });
 
-  const stored = sessionStorage.getItem(PKCE_KEY(slot))
-  sessionStorage.removeItem(PKCE_KEY(slot))
+  const stored = sessionStorage.getItem(PKCE_KEY(slot));
+  sessionStorage.removeItem(PKCE_KEY(slot));
   const { verifier, state: expectedState } = stored
     ? (JSON.parse(stored) as { verifier: string; state: string })
-    : { verifier: '', state: '' }
+    : { verifier: '', state: '' };
   if (!verifier || state !== expectedState)
-    throw Object.assign(new Error('state-mismatch'), { slot })
+    throw Object.assign(new Error('state-mismatch'), { slot });
 
-  const code = params.get('code')
-  if (!code) throw Object.assign(new Error('missing-code'), { slot })
+  const code = params.get('code');
+  if (!code) throw Object.assign(new Error('missing-code'), { slot });
 
   const json = await postToken(
     {
@@ -196,8 +200,8 @@ export async function completeLogin(
       code_verifier: verifier,
     },
     fetchImpl,
-  )
-  return { slot, auth: toAuthData(json) }
+  );
+  return { slot, auth: toAuthData(json) };
 }
 
 export async function refreshAuth(
@@ -207,6 +211,6 @@ export async function refreshAuth(
   const json = await postToken(
     { client_id: getClientId(), grant_type: 'refresh_token', refresh_token: auth.refreshToken },
     fetchImpl,
-  )
-  return toAuthData(json, auth.refreshToken)
+  );
+  return toAuthData(json, auth.refreshToken);
 }

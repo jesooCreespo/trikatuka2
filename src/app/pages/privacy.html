@@ -5,7 +5,7 @@
 
 @if (!english()) {
   <p
-    class="flex max-w-3xl items-center gap-2 rounded-lg border bg-muted/50 p-3 text-sm text-muted-foreground"
+    class="bg-muted/50 text-muted-foreground flex max-w-3xl items-center gap-2 rounded-lg border p-3 text-sm"
   >
     <ng-icon name="lucideLanguages" class="shrink-0" aria-hidden="true" />
     {{ i18n.t('privacy.englishOnly') }}
@@ -14,7 +14,7 @@
 
 <article
   lang="en"
-  class="max-w-3xl space-y-8 rounded-xl border bg-card p-6 leading-relaxed sm:p-8 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:tracking-tight [&_section]:space-y-3 [&_ul]:list-disc [&_ul]:space-y-1 [&_ul]:pl-5"
+  class="bg-card max-w-3xl space-y-8 rounded-xl border p-6 leading-relaxed sm:p-8 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:tracking-tight [&_section]:space-y-3 [&_ul]:list-disc [&_ul]:space-y-1 [&_ul]:pl-5"
 >
   <h1 class="text-3xl font-semibold tracking-tight">Privacy Policy</h1>
 
@@ -80,7 +80,7 @@
       Google may use this data to show personalized ads based on your browsing behavior. You can
       learn more about how Google uses data
       <a
-        class="text-primary underline-offset-4 hover:underline"
+        class="text-primary underline underline-offset-4"
         href="https://policies.google.com/technologies/partner-sites"
         target="_blank"
         rel="noreferrer"
@@ -101,9 +101,7 @@
       By continuing to use our website, you consent to the use of cookies. You can manage or
       withdraw your consent at any time through your browser settings. For more information on how
       we use cookies, please refer to our
-      <a class="text-primary underline-offset-4 hover:underline" routerLink="/privacy"
-        >Cookie Policy.</a
-      >
+      <a class="text-primary underline underline-offset-4" routerLink="/privacy">Cookie Policy.</a>
     </p>
   </section>
 
@@ -173,9 +171,9 @@
   <section>
     <h2>13. Changes to This Privacy Policy</h2>
     <p>
-      We may update this Privacy Policy from time to time to reflect changes in legal requirements or
-      our data processing practices. Any changes will be posted on this page with an updated "last
-      modified" date.
+      We may update this Privacy Policy from time to time to reflect changes in legal requirements
+      or our data processing practices. Any changes will be posted on this page with an updated
+      "last modified" date.
     </p>
   </section>
 

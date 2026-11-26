@@ -27,14 +27,16 @@ function readLocale(file) {
   const walk = (node, prefix) => {
     if (typeof node === 'string') flat.set(prefix, node);
     else if (node && typeof node === 'object' && !Array.isArray(node)) {
-      for (const [key, value] of Object.entries(node)) walk(value, prefix ? `${prefix}.${key}` : key);
+      for (const [key, value] of Object.entries(node))
+        walk(value, prefix ? `${prefix}.${key}` : key);
     } else problems.push(`"${prefix}" must be a string or an object`);
   };
   walk(data, '');
   return { flat, problems };
 }
 
-const placeholders = (text) => [...new Set([...text.matchAll(PLACEHOLDER)].map((m) => m[1]))].sort();
+const placeholders = (text) =>
+  [...new Set([...text.matchAll(PLACEHOLDER)].map((m) => m[1]))].sort();
 
 const files = readdirSync(DIR);
 const en = readLocale('en.json').flat;

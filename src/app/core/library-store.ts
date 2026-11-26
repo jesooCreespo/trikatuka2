@@ -41,7 +41,10 @@ export class LibraryStore {
 
   /** Starts loading a category the first time it's needed. */
   ensureLoaded(category: Category) {
-    if (this.stateFor(category)().status === 'idle') void this.load(category).catch(() => {});
+    if (this.stateFor(category)().status === 'idle')
+      void this.load(category).catch(() => {
+        // The error is shown through the category state.
+      });
   }
 
   /** Resolves with the whole category, loading it if needed (used by the backup). */
@@ -66,12 +69,16 @@ export class LibraryStore {
       })
       .finally(() => this.pending.delete(key));
     this.pending.set(key, promise);
-    promise.catch(() => {});
+    promise.catch(() => {
+      // Handled by callers and by the state above; avoids an unhandled rejection.
+    });
     return promise;
   }
 
   refresh(category: Category) {
-    void this.load(category, true).catch(() => {});
+    void this.load(category, true).catch(() => {
+      // The error is shown through the category state.
+    });
   }
 
   /** Forget everything (another source account was connected). */

@@ -44,7 +44,7 @@ function progressOf(results: ItemResult[]) {
     <section hlmCard>
       <div hlmCardHeader>
         <h1 hlmCardTitle class="flex items-center gap-2 text-2xl tracking-tight">
-          <ng-icon name="lucideLoaderCircle" class="animate-spin text-primary" aria-hidden="true" />
+          <ng-icon name="lucideLoaderCircle" class="text-primary animate-spin" aria-hidden="true" />
           {{ i18n.t('run.title') }}
         </h1>
         <p hlmCardDescription>{{ i18n.t('run.subtitle') }}</p>
@@ -52,7 +52,7 @@ function progressOf(results: ItemResult[]) {
       <div hlmCardContent class="space-y-6">
         <div class="space-y-2" role="status" aria-live="polite">
           <div class="flex items-baseline justify-between text-sm">
-            <span class="truncate text-muted-foreground">
+            <span class="text-muted-foreground truncate">
               {{
                 progress().current
                   ? i18n.t('run.current', { name: progress().current!.item.name })

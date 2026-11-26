@@ -1,4 +1,4 @@
-import type { SpotifyClient } from './client'
+import type { SpotifyClient } from './client';
 import type {
   Artist,
   CursorPaging,
@@ -9,7 +9,7 @@ import type {
   SavedShow,
   SavedTrack,
   UserProfile,
-} from './types'
+} from './types';
 
 /**
  * Typed Web API calls, using the endpoints that exist after Spotify's February 2026 migration:
@@ -23,35 +23,36 @@ export const LIMITS = {
   page: 50,
   library: 40,
   addPlaylistItems: 100,
-} as const
+} as const;
 
 export interface SpotifyApi {
-  me(signal?: AbortSignal): Promise<UserProfile>
-  myPlaylists(offset: number, signal?: AbortSignal): Promise<Paging<Playlist>>
+  me(signal?: AbortSignal): Promise<UserProfile>;
+  myPlaylists(offset: number, signal?: AbortSignal): Promise<Paging<Playlist>>;
   playlistItems(
     playlistId: string,
     offset: number,
     signal?: AbortSignal,
-  ): Promise<Paging<PlaylistItem>>
-  savedTracks(offset: number, signal?: AbortSignal): Promise<Paging<SavedTrack>>
-  savedAlbums(offset: number, signal?: AbortSignal): Promise<Paging<SavedAlbum>>
-  savedShows(offset: number, signal?: AbortSignal): Promise<Paging<SavedShow>>
-  followedArtists(after: string | null, signal?: AbortSignal): Promise<CursorPaging<Artist>>
+  ): Promise<Paging<PlaylistItem>>;
+  savedTracks(offset: number, signal?: AbortSignal): Promise<Paging<SavedTrack>>;
+  savedAlbums(offset: number, signal?: AbortSignal): Promise<Paging<SavedAlbum>>;
+  savedShows(offset: number, signal?: AbortSignal): Promise<Paging<SavedShow>>;
+  followedArtists(after: string | null, signal?: AbortSignal): Promise<CursorPaging<Artist>>;
   createPlaylist(
     data: { name: string; public: boolean; description?: string },
     signal?: AbortSignal,
-  ): Promise<Playlist>
-  addPlaylistItems(playlistId: string, uris: string[], signal?: AbortSignal): Promise<void>
-  saveToLibrary(uris: string[], signal?: AbortSignal): Promise<void>
-  libraryContains(uris: string[], signal?: AbortSignal): Promise<boolean[]>
+  ): Promise<Playlist>;
+  addPlaylistItems(playlistId: string, uris: string[], signal?: AbortSignal): Promise<void>;
+  saveToLibrary(uris: string[], signal?: AbortSignal): Promise<void>;
+  libraryContains(uris: string[], signal?: AbortSignal): Promise<boolean[]>;
 }
 
 function assertMax(uris: string[], max: number) {
-  if (uris.length > max) throw new RangeError(`At most ${max} URIs per request, got ${uris.length}`)
+  if (uris.length > max)
+    throw new RangeError(`At most ${max} URIs per request, got ${uris.length}`);
 }
 
 export function createApi(client: SpotifyClient): SpotifyApi {
-  const page = { limit: LIMITS.page }
+  const page = { limit: LIMITS.page };
   return {
     me: (signal) => client.request('GET', '/me', { signal }),
     myPlaylists: (offset, signal) =>
@@ -71,28 +72,28 @@ export function createApi(client: SpotifyClient): SpotifyApi {
       const res = await client.request<{ artists: CursorPaging<Artist> }>('GET', '/me/following', {
         query: { type: 'artist', ...page, after: after ?? undefined },
         signal,
-      })
-      return res.artists
+      });
+      return res.artists;
     },
     createPlaylist: (data, signal) =>
       client.request('POST', '/me/playlists', { body: data, signal }),
     addPlaylistItems: async (id, uris, signal) => {
-      assertMax(uris, LIMITS.addPlaylistItems)
+      assertMax(uris, LIMITS.addPlaylistItems);
       await client.request('POST', `/playlists/${encodeURIComponent(id)}/items`, {
         body: { uris },
         signal,
-      })
+      });
     },
     saveToLibrary: async (uris, signal) => {
-      assertMax(uris, LIMITS.library)
-      await client.request('PUT', '/me/library', { query: { uris: uris.join(',') }, signal })
+      assertMax(uris, LIMITS.library);
+      await client.request('PUT', '/me/library', { query: { uris: uris.join(',') }, signal });
     },
     libraryContains: (uris, signal) => {
-      assertMax(uris, LIMITS.library)
+      assertMax(uris, LIMITS.library);
       return client.request('GET', '/me/library/contains', {
         query: { uris: uris.join(',') },
         signal,
-      })
+      });
     },
-  }
+  };
 }

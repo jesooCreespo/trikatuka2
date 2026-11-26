@@ -23,26 +23,28 @@ const TILES: { status: ItemStatus; color: string }[] = [
   host: { class: 'block space-y-6' },
   template: `
     <div class="flex items-center gap-3">
-      <ng-icon [name]="outcome().icon" [class]="'text-3xl ' + outcome().color" aria-hidden="true" />
+      <span class="inline-flex text-3xl" [class]="outcome().color" aria-hidden="true">
+        <ng-icon [name]="outcome().icon" />
+      </span>
       <h1 class="text-2xl font-semibold tracking-tight">{{ i18n.t(outcome().title) }}</h1>
     </div>
 
     <ul class="grid grid-cols-2 gap-3 sm:grid-cols-4">
       @for (tile of tiles; track tile.status) {
-        <li class="rounded-xl border bg-card p-4">
+        <li class="bg-card rounded-xl border p-4">
           <p
             class="text-3xl font-semibold tabular-nums"
             [class]="counts()[tile.status] > 0 ? tile.color : ''"
           >
             {{ counts()[tile.status] }}
           </p>
-          <p class="text-sm text-muted-foreground">{{ i18n.t('status.' + tile.status) }}</p>
+          <p class="text-muted-foreground text-sm">{{ i18n.t('status.' + tile.status) }}</p>
         </li>
       }
     </ul>
 
-    <div class="flex gap-3 rounded-lg border bg-card p-4 text-sm">
-      <ng-icon name="lucideInfo" class="mt-0.5 shrink-0 text-primary" aria-hidden="true" />
+    <div class="bg-card flex gap-3 rounded-lg border p-4 text-sm">
+      <ng-icon name="lucideInfo" class="text-primary mt-0.5 shrink-0" aria-hidden="true" />
       <p class="text-muted-foreground">{{ i18n.t('report.spotifyNote') }}</p>
     </div>
 
@@ -63,7 +65,7 @@ const TILES: { status: ItemStatus; color: string }[] = [
                 <app-cover [item]="r.item" class="size-9" />
                 <div class="min-w-0 flex-1">
                   <p class="truncate text-sm font-medium">{{ r.item.name }}</p>
-                  <p class="truncate text-xs text-muted-foreground">
+                  <p class="text-muted-foreground truncate text-xs">
                     {{ i18n.t('categories.' + r.item.category) }}
                     @if (reason(r); as text) {
                       · {{ text }}
@@ -71,9 +73,7 @@ const TILES: { status: ItemStatus; color: string }[] = [
                   </p>
                 </div>
                 <span hlmBadge [variant]="r.status === 'failed' ? 'destructive' : 'secondary'">
-                  {{
-                    i18n.t(r.status === 'failed' ? 'itemStatus.failed' : 'itemStatus.cancelled')
-                  }}
+                  {{ i18n.t(r.status === 'failed' ? 'itemStatus.failed' : 'itemStatus.cancelled') }}
                 </span>
               </li>
             }

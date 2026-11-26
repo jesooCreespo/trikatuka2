@@ -1,31 +1,31 @@
-import type { BrowserContext } from '@playwright/test'
-import type { FakeLibrary } from '../e2e/fake-spotify'
+import type { BrowserContext } from '@playwright/test';
+import type { FakeLibrary } from '../e2e/fake-spotify';
 
 /**
  * A realistic but entirely made-up library for the demo screenshots. Every name is invented and
  * covers are generated SVGs served from a reserved `.invalid` domain: nothing real is shown.
  */
 
-const COVER_HOST = 'https://covers.trikatuka.invalid'
+const COVER_HOST = 'https://covers.trikatuka.invalid';
 
 /** Deterministic PRNG so every run produces the same screenshots. */
 function rng(seed: number) {
-  let s = seed >>> 0
+  let s = seed >>> 0;
   return () => {
-    s = (s * 1664525 + 1013904223) >>> 0
-    return s / 2 ** 32
-  }
+    s = (s * 1664525 + 1013904223) >>> 0;
+    return s / 2 ** 32;
+  };
 }
-const random = rng(20261126)
-const pick = <T>(items: readonly T[]) => items[Math.floor(random() * items.length)]!
+const random = rng(20261126);
+const pick = <T>(items: readonly T[]) => items[Math.floor(random() * items.length)]!;
 
-let coverSeq = 0
+let coverSeq = 0;
 function cover(size = 300) {
-  const n = coverSeq++
-  const a = Math.floor(random() * 360)
-  const b = (a + 40 + Math.floor(random() * 120)) % 360
-  const shape = n % 4
-  return [{ url: `${COVER_HOST}/${a}-${b}-${shape}.svg`, width: size, height: size }]
+  const n = coverSeq++;
+  const a = Math.floor(random() * 360);
+  const b = (a + 40 + Math.floor(random() * 120)) % 360;
+  const shape = n % 4;
+  return [{ url: `${COVER_HOST}/${a}-${b}-${shape}.svg`, width: size, height: size }];
 }
 
 const ARTISTS = [
@@ -44,7 +44,7 @@ const ARTISTS = [
   'Tomás Reyes Trio',
   'Amber Coastline',
   'Glass Harbor',
-]
+];
 
 const ALBUMS = [
   'Low Tide Letters',
@@ -65,7 +65,7 @@ const ALBUMS = [
   'Small Victories',
   'Weather Report',
   'Second Spring',
-]
+];
 
 const TITLE_A = [
   'Paper',
@@ -84,7 +84,7 @@ const TITLE_A = [
   'Little',
   'Blue',
   'Brave',
-]
+];
 const TITLE_B = [
   'Hearts',
   'Rivers',
@@ -102,11 +102,11 @@ const TITLE_B = [
   'Horizon',
   'Signals',
   'Morning',
-]
+];
 
 function trackName(i: number) {
   // 16 x 16 unique combinations, more than the 148 songs we need.
-  return `${TITLE_A[i % TITLE_A.length]} ${TITLE_B[Math.floor(i / TITLE_A.length) % TITLE_B.length]}`
+  return `${TITLE_A[i % TITLE_A.length]} ${TITLE_B[Math.floor(i / TITLE_A.length) % TITLE_B.length]}`;
 }
 
 const artistObjects = ARTISTS.map((name, i) => ({
@@ -114,22 +114,22 @@ const artistObjects = ARTISTS.map((name, i) => ({
   name,
   uri: `spotify:artist:ar${i}`,
   images: cover(320),
-}))
+}));
 
 const albumObjects = ALBUMS.map((name, i) => {
-  const artist = artistObjects[i % artistObjects.length]!
+  const artist = artistObjects[i % artistObjects.length]!;
   return {
     id: `al${i}`,
     name,
     uri: `spotify:album:al${i}`,
     images: cover(),
     artists: [{ id: artist.id, name: artist.name, uri: artist.uri }],
-  }
-})
+  };
+});
 
 const trackObjects = Array.from({ length: 148 }, (_, i) => {
-  const album = pick(albumObjects)
-  const artist = album.artists[0]!
+  const album = pick(albumObjects);
+  const artist = album.artists[0]!;
   return {
     id: `tr${i}`,
     name: trackName(i),
@@ -137,20 +137,20 @@ const trackObjects = Array.from({ length: 148 }, (_, i) => {
     type: 'track',
     artists: [artist],
     album: { name: album.name, images: album.images },
-  }
-})
+  };
+});
 
-const OLD = { id: 'sam.rivera', display_name: 'Sam Rivera' }
-const NEW = { id: 'sam.rivera.2026', display_name: 'Sam Rivera' }
+const OLD = { id: 'sam.rivera', display_name: 'Sam Rivera' };
+const NEW = { id: 'sam.rivera.2026', display_name: 'Sam Rivera' };
 
 interface PlaylistSpec {
-  id: string
-  name: string
-  owner: { id: string; display_name: string }
-  collaborative?: boolean
-  public?: boolean
-  size: number
-  description?: string
+  id: string;
+  name: string;
+  owner: { id: string; display_name: string };
+  collaborative?: boolean;
+  public?: boolean;
+  size: number;
+  description?: string;
 }
 
 const PLAYLISTS: PlaylistSpec[] = [
@@ -209,7 +209,7 @@ const PLAYLISTS: PlaylistSpec[] = [
     size: 58,
     description: 'First dance included.',
   },
-]
+];
 
 const playlists = PLAYLISTS.map((p) => ({
   id: p.id,
@@ -221,7 +221,7 @@ const playlists = PLAYLISTS.map((p) => ({
   images: cover(),
   owner: p.owner,
   items: { total: p.size },
-}))
+}));
 
 /** The old user can read items of playlists they own or collaborate on. */
 const playlistItems = Object.fromEntries(
@@ -233,11 +233,11 @@ const playlistItems = Object.fromEntries(
       item: pick(trackObjects),
     })),
   ]),
-)
+);
 
 const avatar = (initial: string, hue: number) => [
   { url: `${COVER_HOST}/avatar-${initial}-${hue}.svg`, width: 300, height: 300 },
-]
+];
 
 export const DEMO_LIBRARY: FakeLibrary = {
   users: {
@@ -262,31 +262,31 @@ export const DEMO_LIBRARY: FakeLibrary = {
   })),
   // The new account already has a few songs and an album: they get skipped.
   targetSaved: [...trackObjects.slice(0, 12).map((t) => t.uri), albumObjects[0]!.uri],
-}
+};
 
 /** Two playlists whose follow is refused, so the report shows what a failure looks like. */
-export const DEMO_FAILURES = ['spotify:playlist:pl-acoustic', 'spotify:playlist:pl-night']
+export const DEMO_FAILURES = ['spotify:playlist:pl-acoustic', 'spotify:playlist:pl-night'];
 
 function coverSvg(name: string) {
-  const avatarMatch = name.match(/^avatar-(\w)-(\d+)$/)
+  const avatarMatch = name.match(/^avatar-(\w)-(\d+)$/);
   if (avatarMatch) {
-    const [, initial, hue] = avatarMatch
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="hsl(${hue} 55% 45%)"/><text x="50" y="64" font-family="system-ui,sans-serif" font-size="44" font-weight="600" fill="#fff" text-anchor="middle">${initial}</text></svg>`
+    const [, initial, hue] = avatarMatch;
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="hsl(${hue} 55% 45%)"/><text x="50" y="64" font-family="system-ui,sans-serif" font-size="44" font-weight="600" fill="#fff" text-anchor="middle">${initial}</text></svg>`;
   }
-  const [a, b, shape] = name.split('-').map(Number) as [number, number, number]
+  const [a, b, shape] = name.split('-').map(Number) as [number, number, number];
   const shapes = [
     `<circle cx="66" cy="38" r="22" fill="hsl(${b} 85% 85% / .55)"/>`,
     `<path d="M0 72 Q25 52 50 72 T100 72 V100 H0Z" fill="hsl(${b} 80% 88% / .5)"/>`,
     `<rect x="22" y="22" width="56" height="56" rx="6" transform="rotate(14 50 50)" fill="none" stroke="hsl(${b} 90% 90% / .6)" stroke-width="5"/>`,
     `<g fill="hsl(${b} 90% 92% / .5)"><circle cx="30" cy="30" r="8"/><circle cx="70" cy="45" r="12"/><circle cx="40" cy="74" r="10"/></g>`,
-  ]
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(${a} 65% 52%)"/><stop offset="1" stop-color="hsl(${b} 60% 32%)"/></linearGradient></defs><rect width="100" height="100" fill="url(#g)"/>${shapes[shape]}</svg>`
+  ];
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(${a} 65% 52%)"/><stop offset="1" stop-color="hsl(${b} 60% 32%)"/></linearGradient></defs><rect width="100" height="100" fill="url(#g)"/>${shapes[shape]}</svg>`;
 }
 
 /** Serves the generated covers. */
 export async function installDemoCovers(context: BrowserContext) {
   await context.route(`${COVER_HOST}/**`, (route) => {
-    const name = new URL(route.request().url()).pathname.slice(1).replace(/\.svg$/, '')
-    return route.fulfill({ status: 200, contentType: 'image/svg+xml', body: coverSvg(name) })
-  })
+    const name = new URL(route.request().url()).pathname.slice(1).replace(/\.svg$/, '');
+    return route.fulfill({ status: 200, contentType: 'image/svg+xml', body: coverSvg(name) });
+  });
 }

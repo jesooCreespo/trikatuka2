@@ -1,28 +1,28 @@
-import { playlistAction, type Category, type LibraryItem } from '@/lib/library'
-import type { SpotifyApi } from '@/lib/spotify/endpoints'
-import { fetchAllOffset } from '@/lib/spotify/paginate'
-import type { UserProfile } from '@/lib/spotify/types'
+import { playlistAction, type Category, type LibraryItem } from '@/lib/library';
+import type { SpotifyApi } from '@/lib/spotify/endpoints';
+import { fetchAllOffset } from '@/lib/spotify/paginate';
+import type { UserProfile } from '@/lib/spotify/types';
 
 export interface LibraryBackup {
-  format: 'trikatuka-backup'
-  version: 1
-  appVersion: string
-  exportedAt: string
-  user: { id: string; displayName: string | null }
-  playlists: Array<{
-    name: string
-    uri: string
-    owner: string
-    public: boolean
-    collaborative: boolean
-    description: string | null
+  format: 'trikatuka-backup';
+  version: 1;
+  appVersion: string;
+  exportedAt: string;
+  user: { id: string; displayName: string | null };
+  playlists: {
+    name: string;
+    uri: string;
+    owner: string;
+    public: boolean;
+    collaborative: boolean;
+    description: string | null;
     /** Only present for playlists the user owns (Spotify doesn't expose other playlists' items). */
-    items?: string[]
-  }>
-  tracks: Array<{ name: string; uri: string; subtitle: string }>
-  albums: Array<{ name: string; uri: string; subtitle: string }>
-  artists: Array<{ name: string; uri: string }>
-  shows: Array<{ name: string; uri: string }>
+    items?: string[];
+  }[];
+  tracks: { name: string; uri: string; subtitle: string }[];
+  albums: { name: string; uri: string; subtitle: string }[];
+  artists: { name: string; uri: string }[];
+  shows: { name: string; uri: string }[];
 }
 
 /**
@@ -37,15 +37,15 @@ export async function buildBackup(
   onProgress?: (done: number, total: number) => void,
   signal?: AbortSignal,
 ): Promise<LibraryBackup> {
-  const playlists = library.playlists ?? []
-  const out: LibraryBackup['playlists'] = []
+  const playlists = library.playlists ?? [];
+  const out: LibraryBackup['playlists'] = [];
   for (const [i, p] of playlists.entries()) {
-    const owned = playlistAction(p, user.id) === 'copy'
+    const owned = playlistAction(p, user.id) === 'copy';
     const items = owned
       ? (await fetchAllOffset((o) => api.playlistItems(p.id, o, signal)))
           .map((e) => (e.item ?? e.track)?.uri)
           .filter((uri): uri is string => Boolean(uri))
-      : undefined
+      : undefined;
     out.push({
       name: p.name,
       uri: p.uri,
@@ -54,12 +54,12 @@ export async function buildBackup(
       collaborative: p.playlist?.collaborative ?? false,
       description: p.playlist?.description ?? null,
       ...(items ? { items } : {}),
-    })
-    onProgress?.(i + 1, playlists.length)
+    });
+    onProgress?.(i + 1, playlists.length);
   }
 
   const basic = (items: LibraryItem[] = []) =>
-    items.map(({ name, uri, subtitle }) => ({ name, uri, subtitle }))
+    items.map(({ name, uri, subtitle }) => ({ name, uri, subtitle }));
 
   return {
     format: 'trikatuka-backup',
@@ -72,5 +72,5 @@ export async function buildBackup(
     albums: basic(library.albums),
     artists: (library.artists ?? []).map(({ name, uri }) => ({ name, uri })),
     shows: (library.shows ?? []).map(({ name, uri }) => ({ name, uri })),
-  }
+  };
 }
