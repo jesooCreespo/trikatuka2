@@ -179,6 +179,40 @@ test('the whole transfer works under the security headers', async ({ context, pa
   expect(result.errors).toEqual([]);
 });
 
+test('keep-order pauses run in the timer worker under the security headers', async ({
+  context,
+  page,
+  baseURL,
+}) => {
+  const result = await guard(context, baseURL!);
+  const spotify = await installFakeSpotify(context, { library: LIBRARY });
+
+  await page.goto('/');
+  await signIn(page);
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await signIn(page);
+  await page.getByRole('button', { name: 'Continue' }).click();
+
+  await page.getByRole('tab', { name: /Liked songs/ }).click();
+  const songs = page.getByRole('tabpanel', { name: /Liked songs/ });
+  await songs.getByText('Song 1', { exact: true }).click();
+  await songs.getByText('Song 2', { exact: true }).click();
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await page.getByLabel('Keep the order of liked songs').click();
+
+  // Creating the worker is a Trusted Types sink: it must not be blocked (and silently fall back
+  // to main-thread timers, which hidden tabs throttle).
+  const worker = page.waitForEvent('worker');
+  await page.getByRole('button', { name: 'Start transfer' }).click();
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Start transfer' }).click();
+  expect((await worker).url()).toMatch(/\/worker-[\w-]+\.js(\?|$)/);
+  await expect(page.getByRole('heading', { name: 'Transfer finished' })).toBeVisible();
+  expect(spotify.saved).toEqual(['spotify:track:t2', 'spotify:track:t1']);
+
+  expect(result.violations).toEqual([]);
+  expect(result.errors).toEqual([]);
+});
+
 test('the theme script still applies dark mode before first paint', async ({
   browser,
   baseURL,

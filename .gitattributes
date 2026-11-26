@@ -1,3 +1,6 @@
+# LF everywhere, on every OS (Prettier expects it; Windows checkouts would otherwise get CRLF).
+* text=auto eol=lf
+
 # Vendored reference files must stay byte-identical to their source (see docs/angular/SOURCE.md).
 docs/angular/*.md -text
 docs/angular/*.txt -text
