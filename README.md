@@ -73,7 +73,8 @@ VITE_ADSENSE_SLOT=XXXXXXXXXX
 VITE_ADSENSE_NON_PERSONALIZED=false        # true = non-personalized ads only
 ```
 
-Rebuild and deploy after changing it. Before turning ads on for visitors in the EEA, UK or
+Rebuild and deploy after changing it. The Content Security Policy in `firebase.json` blocks
+Google's scripts by default: widen it as described in `CLAUDE.md` ("Enabling AdSense"). Before turning ads on for visitors in the EEA, UK or
 Switzerland, set up a consent message (a Google-certified CMP, e.g. "Privacy & messaging" in
 the AdSense account), and make sure the privacy policy matches what is enabled.
 
@@ -82,6 +83,9 @@ the AdSense account), and make sure the privacy policy matches what is enabled.
 ```bash
 firebase deploy --only hosting   # runs npm run build first
 ```
+
+`firebase.json` also sends security headers (a Content Security Policy, Trusted Types and
+others); `e2e/security-headers.spec.ts` runs the app under them.
 
 `firebase emulators:start --only hosting` serves `dist/` locally with the rewrites, but the
 local emulator does not apply the `redirects` and `headers` of `firebase.json`. Check those on a

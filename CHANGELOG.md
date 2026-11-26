@@ -37,6 +37,10 @@ configuration and the UI flow all change.
   it) so the computer doesn't go to sleep mid-transfer.
 - The transfer step explains that keeping the order of liked songs is slow by design and that the
   tab should stay open and the computer awake.
+- Security headers on Firebase Hosting: a Content Security Policy (scripts only from the app
+  itself, connections only to Spotify, images only from Spotify's CDNs, Trusted Types, no
+  framing), plus Referrer-Policy, X-Content-Type-Options, X-Frame-Options and Permissions-Policy.
+  They limit what an injected script could do with the Spotify tokens kept in the browser.
 - Unit tests (Vitest) and end-to-end tests (Playwright) against a fake Spotify.
 - Automated accessibility checks: an end-to-end test runs axe-core (WCAG 2.2 AA) on every wizard
   step, the confirmation dialog, the help page and the privacy policy, in light and dark themes.

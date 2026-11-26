@@ -6,6 +6,10 @@ import { App } from './App'
 import { i18nReady } from './i18n'
 import './index.css'
 import { watchSystemTheme } from './lib/theme'
+import { installDefaultTrustedTypesPolicy } from './lib/trusted-types'
+
+// Before anything can reach a Trusted Types sink (the timer worker).
+installDefaultTrustedTypesPolicy()
 
 const queryClient = new QueryClient({
   defaultOptions: {
