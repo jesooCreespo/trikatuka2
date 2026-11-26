@@ -18,7 +18,8 @@ npm run format                       # Prettier (also sorts Tailwind classes)
 npm test                             # Vitest, all unit tests
 npx vitest run src/transfer/engine.test.ts   # one file
 npx vitest run -t "keeps order"              # tests matching a name
-npm run test:e2e                     # Playwright; builds and serves dist/ on :4173
+npm run test:e2e                     # Playwright (incl. axe accessibility); builds and serves dist/ on :4173
+E2E_PORT=4177 npm run test:e2e       # other port (PowerShell: $env:E2E_PORT=4177), for parallel checkouts
 npx playwright test -g "Italian"     # one e2e test
 ```
 
@@ -56,6 +57,8 @@ Run commands from Git Bash or PowerShell; no POSIX-only scripts are needed.
 **Dev/prod parity**: Spotify allows `http` redirect URIs only on loopback IPs, so dev runs on `127.0.0.1:5173` (not `localhost`), with redirect `http://127.0.0.1:5173/afterLogin`. A Vite plugin in `vite.config.ts` rewrites `/afterLogin` → `afterLogin.html` like `firebase.json` does in production. Static files (favicon) live in `static/` (Vite `publicDir`; `public/` is gitignored).
 
 **E2E tests** (`e2e/`) run against an in-memory fake Spotify (`e2e/fake-spotify.ts`) installed with `context.route`, including the OAuth popup flow; extend it when adding endpoints. `npm run screenshots` (`screenshots/`, own Playwright config) reuses it with a made-up demo library (`screenshots/demo-library.ts`: invented names, generated SVG covers on a `.invalid` domain, two forced failures) and writes `docs/screenshots/`. Regenerate them after visible UI changes.
+
+**Accessibility**: `e2e/accessibility.spec.ts` runs axe-core (`@axe-core/playwright`, WCAG 2.2 AA tags) on every wizard step, the confirm dialog, help and privacy, in both color schemes; it must stay green. Theme colors in `src/index.css` were tuned for contrast (light primary/success/ring and destructive darker, dark destructive lighter); rerun it after changing them. Filters without panels are toggle-button groups (`role="group"` + `aria-pressed`), not Radix Tabs (Tabs need real `TabsContent`, or `aria-controls` is invalid). Icon-plus-text buttons keep their visible text in the accessible name (use `sr-only` text, not an `aria-label` that replaces it). Links inside running text are always underlined.
 
 ## Versioning
 

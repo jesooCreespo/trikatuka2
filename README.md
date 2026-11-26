@@ -54,11 +54,12 @@ npm run lint
 npm run typecheck
 npm run format       # Prettier
 npm test             # unit tests (Vitest)
-npm run test:e2e     # end-to-end tests (Playwright, fake Spotify; builds first)
+npm run test:e2e     # end-to-end + axe accessibility tests (Playwright, fake Spotify; builds first)
 npm run screenshots  # regenerate docs/screenshots/ (demo library, all languages/themes)
 ```
 
-The first time, install the Playwright browser with `npx playwright install chromium`.
+The first time, install the Playwright browser with `npx playwright install chromium`. Set
+`E2E_PORT` (default 4173) to serve the e2e and screenshot tests on another port.
 
 ### Advertising (optional)
 

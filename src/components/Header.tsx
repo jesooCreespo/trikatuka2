@@ -34,8 +34,10 @@ export function Header() {
         <div className="ml-auto flex items-center gap-1">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" aria-label={t('app.language')}>
-                <Languages />
+              <Button variant="ghost" size="sm">
+                <Languages aria-hidden />
+                {/* The accessible name includes the visible code ("Language: en"). */}
+                <span className="sr-only">{t('app.language')}:</span>
                 <span className="uppercase">{lang}</span>
               </Button>
             </DropdownMenuTrigger>

@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { matchesSearch, playlistAction, type Category } from '@/lib/library'
+import { cn } from '@/lib/utils'
 import { useSession } from '@/state/session'
 import { useWizard } from '@/state/wizard'
 import { ItemRow } from './ItemRow'
@@ -13,6 +13,11 @@ import { useLibrary } from './library-query'
 
 const PAGE_SIZE = 50
 type PlaylistFilter = 'all' | 'copy' | 'follow'
+const PLAYLIST_FILTERS = [
+  { value: 'all', label: 'select.filterAll' },
+  { value: 'copy', label: 'select.filterCopy' },
+  { value: 'follow', label: 'select.filterFollow' },
+] as const satisfies readonly { value: PlaylistFilter; label: string }[]
 
 export function CategoryPanel({ category }: { category: Category }) {
   const { t } = useTranslation()
@@ -95,19 +100,32 @@ export function CategoryPanel({ category }: { category: Category }) {
           />
         </div>
         {category === 'playlists' && (
-          <Tabs
-            value={filter}
-            onValueChange={(v) => {
-              setFilter(v as PlaylistFilter)
-              setPage(1)
-            }}
+          // A filter, not tabs (there are no panels): toggle buttons in a labelled group.
+          <div
+            role="group"
+            aria-label={t('categories.playlists')}
+            className="bg-muted inline-flex h-9 items-center rounded-lg p-[3px]"
           >
-            <TabsList>
-              <TabsTrigger value="all">{t('select.filterAll')}</TabsTrigger>
-              <TabsTrigger value="copy">{t('select.filterCopy')}</TabsTrigger>
-              <TabsTrigger value="follow">{t('select.filterFollow')}</TabsTrigger>
-            </TabsList>
-          </Tabs>
+            {PLAYLIST_FILTERS.map(({ value, label }) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={filter === value}
+                onClick={() => {
+                  setFilter(value)
+                  setPage(1)
+                }}
+                className={cn(
+                  'focus-visible:ring-ring/50 h-full rounded-md px-3 text-sm font-medium transition-colors focus-visible:ring-3 focus-visible:outline-none',
+                  filter === value
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                {t(label)}
+              </button>
+            ))}
+          </div>
         )}
         <Button
           variant="ghost"

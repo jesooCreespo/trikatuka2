@@ -29,6 +29,10 @@ configuration and the UI flow all change.
 - Optional Google AdSense banner, off by default. It is enabled and configured with
   `VITE_ADSENSE_*` variables; when off, no Google script is loaded.
 - Unit tests (Vitest) and end-to-end tests (Playwright) against a fake Spotify.
+- Automated accessibility checks: an end-to-end test runs axe-core (WCAG 2.2 AA) on every wizard
+  step, the confirmation dialog, the help page and the privacy policy, in light and dark themes.
+- `E2E_PORT` sets the port of the end-to-end and screenshot test server (default 4173), so several
+  checkouts can run them at the same time.
 
 ### Changed
 
@@ -55,6 +59,14 @@ configuration and the UI flow all change.
 
 - Transfers no longer fail on endpoints that Spotify removed in February 2026.
 - Local files are skipped when copying a playlist instead of making the request fail.
+- Accessibility (WCAG 2.2 AA):
+  - Text contrast: the light theme's green (buttons, links, badges, focus ring) and red are
+    darker, the dark theme's red is lighter.
+  - The language button's accessible name includes the visible language code ("Language: en").
+  - The playlist filter (All / Copied / Followed) is a group of toggle buttons (`aria-pressed`)
+    instead of tabs that pointed to panels that don't exist.
+  - Empty sections in the review step have a dashed border instead of faded, low-contrast text.
+  - Links in the privacy policy text are always underlined, not only on hover.
 
 ## [2.7.1] - 2026-03-06
 

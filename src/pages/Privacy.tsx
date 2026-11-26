@@ -29,7 +29,8 @@ function List({ items }: { items: ReactNode[] }) {
   )
 }
 
-const externalLink = 'text-primary underline-offset-4 hover:underline'
+// Links inside running text are always underlined: color alone doesn't set them apart (WCAG 1.4.1).
+const externalLink = 'text-primary underline underline-offset-4'
 
 export function Privacy() {
   const { t, i18n } = useTranslation()

@@ -122,13 +122,17 @@ export function StepReview() {
               return (
                 <li
                   key={c}
-                  className={`flex items-center gap-3 rounded-lg border p-3 ${n === 0 ? 'opacity-50' : ''}`}
+                  className={`flex items-center gap-3 rounded-lg border p-3 ${n === 0 ? 'border-dashed' : ''}`}
                 >
                   <span className="bg-accent text-accent-foreground grid size-9 place-items-center rounded-md">
                     <CategoryIcon category={c} />
                   </span>
                   <div>
-                    <p className="text-lg leading-tight font-semibold tabular-nums">{n}</p>
+                    <p
+                      className={`text-lg leading-tight font-semibold tabular-nums ${n === 0 ? 'text-muted-foreground' : ''}`}
+                    >
+                      {n}
+                    </p>
                     <p className="text-muted-foreground text-sm">
                       {t(`categories.${c}`)}
                       {c === 'playlists' && n > 0 && (
