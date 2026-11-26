@@ -8,6 +8,7 @@ import { Wizard } from '@/app/core/wizard';
 import { I18n } from '@/i18n/i18n';
 import { CATEGORIES, type Category } from '@/lib/library';
 import type { ItemResult } from '@/transfer/engine';
+import { RunDetails } from './run-details';
 import { CategoryIcon } from './shared';
 
 const isDone = (status: string) => status !== 'pending' && status !== 'running';
@@ -37,7 +38,7 @@ function progressOf(results: ItemResult[]) {
 
 @Component({
   selector: 'app-step-run',
-  imports: [NgIcon, HlmButtonImports, HlmCardImports, HlmProgressImports, CategoryIcon],
+  imports: [NgIcon, HlmButtonImports, HlmCardImports, HlmProgressImports, CategoryIcon, RunDetails],
   // Warn before leaving the page while a transfer runs.
   host: { class: 'mx-auto block max-w-2xl', '(window:beforeunload)': '$event.preventDefault()' },
   template: `
@@ -70,6 +71,9 @@ function progressOf(results: ItemResult[]) {
           >
             <hlm-progress-indicator />
           </hlm-progress>
+          @if (etaMinutes(); as minutes) {
+            <p class="text-muted-foreground text-xs">{{ i18n.tn('run.eta', minutes) }}</p>
+          }
         </div>
 
         <ul class="space-y-3">
@@ -94,6 +98,8 @@ function progressOf(results: ItemResult[]) {
             </li>
           }
         </ul>
+
+        <app-run-details [results]="results()" />
 
         @if (slowByDesign()) {
           <div class="flex gap-3 rounded-lg border p-4 text-sm">
@@ -124,7 +130,19 @@ export class StepRun {
   protected readonly i18n = inject(I18n);
   protected readonly run = inject(RunController);
   private readonly wizard = inject(Wizard);
-  protected readonly progress = computed(() => progressOf(this.wizard.results()));
+  protected readonly results = this.wizard.results;
+  protected readonly progress = computed(() => progressOf(this.results()));
+  /**
+   * With "keep order", liked songs go one per second (plus the request itself), so the remaining
+   * time can be estimated. Other transfers are too fast or too variable to estimate.
+   */
+  protected readonly etaMinutes = computed(() => {
+    if (!this.wizard.options().keepOrder) return 0;
+    const remaining = this.results().filter(
+      (r) => r.item.category === 'tracks' && (r.status === 'pending' || r.status === 'running'),
+    ).length;
+    return remaining ? Math.ceil((remaining * 1.2) / 60) : 0;
+  });
   /** "Keep order" saves liked songs one per second: tell the user why it is slow. */
   protected readonly slowByDesign = computed(
     () => this.wizard.options().keepOrder && (this.wizard.selectedItems().tracks?.length ?? 0) > 0,

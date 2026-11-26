@@ -112,7 +112,14 @@
     "current": "Ora: {{name}}",
     "preparing": "Preparazione…",
     "keepOrderTitle": "I brani piaciuti vengono salvati uno alla volta",
-    "keepOrderNote": "È lento di proposito, così i brani piaciuti mantengono il loro ordine. Tieni aperta questa scheda e non mettere il computer in sospensione; nel frattempo puoi usare altre schede."
+    "keepOrderNote": "È lento di proposito, così i brani piaciuti mantengono il loro ordine. Tieni aperta questa scheda e non mettere il computer in sospensione; nel frattempo puoi usare altre schede.",
+    "detailsTitle": "Dettagli",
+    "phaseReading": "Lettura {{done}} di {{total}}",
+    "phaseCreating": "Creazione della playlist",
+    "phaseAdding": "Aggiunta {{done}} di {{total}}",
+    "eta_one": "Circa {{count}} minuto rimanente",
+    "eta_many": "Circa {{count}} minuti rimanenti",
+    "eta_other": "Circa {{count}} minuti rimanenti"
   },
   "report": {
     "titleDone": "Trasferimento completato",
@@ -136,7 +143,11 @@
   },
   "itemStatus": {
     "failed": "Fallito",
-    "cancelled": "Non trasferito"
+    "cancelled": "Non trasferito",
+    "pending": "In attesa",
+    "running": "In corso",
+    "ok": "Completato",
+    "skipped": "Saltato"
   },
   "result": {
     "alreadyInLibrary": "Già presente nel nuovo account",

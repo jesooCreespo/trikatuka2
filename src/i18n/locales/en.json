@@ -108,7 +108,13 @@
     "current": "Now: {{name}}",
     "preparing": "Preparing…",
     "keepOrderTitle": "Liked songs are saved one at a time",
-    "keepOrderNote": "This is slow on purpose, so your liked songs keep their order. Keep this tab open and don't let your computer go to sleep; you can use other tabs in the meantime."
+    "keepOrderNote": "This is slow on purpose, so your liked songs keep their order. Keep this tab open and don't let your computer go to sleep; you can use other tabs in the meantime.",
+    "detailsTitle": "Details",
+    "phaseReading": "Reading {{done}} of {{total}}",
+    "phaseCreating": "Creating the playlist",
+    "phaseAdding": "Adding {{done}} of {{total}}",
+    "eta_one": "About {{count}} minute left",
+    "eta_other": "About {{count}} minutes left"
   },
   "report": {
     "titleDone": "Transfer finished",
@@ -132,7 +138,11 @@
   },
   "itemStatus": {
     "failed": "Failed",
-    "cancelled": "Not transferred"
+    "cancelled": "Not transferred",
+    "pending": "Waiting",
+    "running": "In progress",
+    "ok": "Done",
+    "skipped": "Skipped"
   },
   "result": {
     "alreadyInLibrary": "Already in the new account",

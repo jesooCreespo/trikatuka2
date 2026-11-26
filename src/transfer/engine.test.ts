@@ -2,7 +2,7 @@ import type { LibraryItem } from '@/lib/library';
 import { SpotifyApiError } from '@/lib/spotify/client';
 import type { SpotifyApi } from '@/lib/spotify/endpoints';
 import type { Paging } from '@/lib/spotify/types';
-import { runTransfer, summarize, type TransferContext } from './engine';
+import { runTransfer, summarize, type ItemResult, type TransferContext } from './engine';
 
 function paging<T>(items: T[], offset = 0, size = 50): Paging<T> {
   const page = items.slice(offset, offset + size);
@@ -223,6 +223,54 @@ describe('runTransfer: playlists', () => {
     expect(vi.mocked(target.addPlaylistItems).mock.calls.map((c) => c[1].length)).toEqual([
       100, 100, 30,
     ]);
+  });
+
+  it('reports the phases of a playlist copy, then clears them', async () => {
+    const entries = Array.from({ length: 230 }, (_, i) => ({
+      added_at: '',
+      is_local: false,
+      item: { uri: `spotify:track:${i}` },
+    }));
+    const source = fakeApi({
+      playlistItems: vi.fn(async (_id: string, o: number) => paging(entries as never[], o)),
+    });
+    const onUpdate = vi.fn();
+    const mine = {
+      ...playlist('mine', 'me'),
+      playlist: { ...playlist('mine', 'me').playlist!, itemCount: 230 },
+    };
+    await runTransfer({ playlists: [mine] }, noOpts, ctx(source, fakeApi(), { onUpdate }));
+
+    const phases = onUpdate.mock.calls
+      .map((c) => (c[0] as ItemResult[])[0]!.progress)
+      .filter(Boolean)
+      .map((p) => ('done' in p! ? `${p!.phase} ${p!.done}/${p!.total}` : p!.phase));
+    // Reading pages are fetched a few at a time, so only the first and last counts are fixed.
+    expect(phases[0]).toBe('reading 0/230');
+    expect(phases).toContain('reading 230/230');
+    expect(phases.slice(phases.indexOf('creating'))).toEqual([
+      'creating',
+      'adding 0/230',
+      'adding 100/230',
+      'adding 200/230',
+      'adding 230/230',
+    ]);
+    const last = onUpdate.mock.calls.at(-1)![0][0] as ItemResult;
+    expect(last).toMatchObject({ status: 'ok', added: 230 });
+    expect(last.progress).toBeUndefined();
+  });
+
+  it('clears the phase when a copy fails', async () => {
+    const target = fakeApi({
+      createPlaylist: vi.fn().mockRejectedValue(new SpotifyApiError(403, 'x')),
+    });
+    const results = await runTransfer(
+      { playlists: [playlist('mine', 'me')] },
+      noOpts,
+      ctx(fakeApi(), target),
+    );
+    expect(results[0]).toMatchObject({ status: 'failed', reason: 'result.forbidden' });
+    expect(results[0]!.progress).toBeUndefined();
   });
 
   it('skips copies whose name already exists in the target and already-followed playlists', async () => {
