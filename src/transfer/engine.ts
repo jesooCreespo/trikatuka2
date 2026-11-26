@@ -182,7 +182,9 @@ async function transferPlaylists(
   let ownedNames = new Set<string>();
   let followed = new Set<string>();
   if (options.skipDuplicates) {
-    const targetPlaylists = await fetchAllOffset((o) => target.myPlaylists(o, signal));
+    const targetPlaylists = await fetchAllOffset((o) => target.myPlaylists(o, signal), undefined, {
+      signal,
+    });
     ownedNames = new Set(
       targetPlaylists.filter((p) => p?.owner.id === ctx.targetUserId).map((p) => p.name),
     );
@@ -225,7 +227,9 @@ async function copyPlaylist(
   target: SpotifyApi,
   signal?: AbortSignal,
 ) {
-  const entries = await fetchAllOffset((o) => source.playlistItems(item.id, o, signal));
+  const entries = await fetchAllOffset((o) => source.playlistItems(item.id, o, signal), undefined, {
+    signal,
+  });
   const uris: string[] = [];
   let omitted = 0;
   for (const entry of entries) {

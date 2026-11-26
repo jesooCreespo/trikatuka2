@@ -42,7 +42,7 @@ export async function buildBackup(
   for (const [i, p] of playlists.entries()) {
     const owned = playlistAction(p, user.id) === 'copy';
     const items = owned
-      ? (await fetchAllOffset((o) => api.playlistItems(p.id, o, signal)))
+      ? (await fetchAllOffset((o) => api.playlistItems(p.id, o, signal), undefined, { signal }))
           .map((e) => (e.item ?? e.track)?.uri)
           .filter((uri): uri is string => Boolean(uri))
       : undefined;
