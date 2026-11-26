@@ -3,7 +3,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
 import { App } from './App'
-import './i18n'
+import { i18nReady } from './i18n'
 import './index.css'
 import { watchSystemTheme } from './lib/theme'
 
@@ -21,12 +21,17 @@ const queryClient = new QueryClient({
 
 watchSystemTheme()
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </QueryClientProvider>
-  </StrictMode>,
-)
+function render() {
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </QueryClientProvider>
+    </StrictMode>,
+  )
+}
+
+// Render once the user's language is loaded (even if loading fails: English is bundled).
+void i18nReady.finally(render)

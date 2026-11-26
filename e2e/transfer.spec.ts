@@ -67,6 +67,23 @@ test('shows the Italian UI when the browser is in Italian', async ({ browser }) 
   await context.close()
 })
 
+test('switches language from the menu, loading it on demand, and remembers it', async ({
+  page,
+}) => {
+  await page.goto('/')
+  await expect(page.getByRole('heading', { name: 'Connect your old account' })).toBeVisible()
+
+  const italianChunk = page.waitForResponse((r) => /\/assets\/it-[\w-]+\.js$/.test(r.url()))
+  await page.getByRole('button', { name: 'Language' }).click()
+  await page.getByRole('menuitemradio', { name: 'Italiano' }).click()
+  await italianChunk
+  await expect(page.getByRole('heading', { name: 'Collega il tuo account vecchio' })).toBeVisible()
+  await expect(page.locator('html')).toHaveAttribute('lang', 'it')
+
+  await page.reload()
+  await expect(page.getByRole('heading', { name: 'Collega il tuo account vecchio' })).toBeVisible()
+})
+
 test('the help page and the OAuth callback route are served', async ({ page }) => {
   await page.goto('/help')
   await expect(page.getByRole('heading', { name: 'How Trikatuka works' })).toBeVisible()

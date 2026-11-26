@@ -22,6 +22,8 @@ configuration and the UI flow all change.
 - Final report with per-item results, "retry failed items" and a JSON report download.
 - JSON backup of the old account's library, including the items of owned playlists.
 - Italian translation, with language selection (detected from the browser).
+- Languages are discovered from `src/i18n/locales/`: adding a language only takes a new JSON
+  file, validated by the test suite. Each language is downloaded only when used.
 - Light and dark themes (follows the system by default).
 - Automatic retry on Spotify rate limits (`429` with `Retry-After`) and server errors.
 - Unit tests (Vitest) and end-to-end tests (Playwright) against a fake Spotify.

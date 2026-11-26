@@ -69,10 +69,13 @@
     "nothingSelected": "Seleziona almeno un elemento per continuare.",
     "selectedCount_one": "{{count}} selezionato",
     "selectedCount_other": "{{count}} selezionati",
+    "selectedCount_many": "{{count}} selezionati",
     "totalSelected_one": "{{count}} elemento selezionato",
     "totalSelected_other": "{{count}} elementi selezionati",
+    "totalSelected_many": "{{count}} elementi selezionati",
     "itemCount_one": "{{count}} elemento",
-    "itemCount_other": "{{count}} elementi"
+    "itemCount_other": "{{count}} elementi",
+    "itemCount_many": "{{count}} elementi"
   },
   "review": {
     "title": "Riepilogo e avvio",
@@ -96,7 +99,8 @@
     "confirmTitle": "Avviare il trasferimento?",
     "cancel": "Annulla",
     "confirmBody_one": "{{count}} elemento verrà aggiunto a {{name}}. Tieni aperta questa scheda fino alla fine.",
-    "confirmBody_other": "{{count}} elementi verranno aggiunti a {{name}}. Tieni aperta questa scheda fino alla fine."
+    "confirmBody_other": "{{count}} elementi verranno aggiunti a {{name}}. Tieni aperta questa scheda fino alla fine.",
+    "confirmBody_many": "{{count}} elementi verranno aggiunti a {{name}}. Tieni aperta questa scheda fino alla fine."
   },
   "run": {
     "title": "Trasferimento in corso…",

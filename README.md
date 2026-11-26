@@ -56,6 +56,23 @@ The first time, install the Playwright browser with `npx playwright install chro
 firebase deploy --only hosting   # runs npm run build first
 ```
 
+## Adding a language
+
+Translations live in `src/i18n/locales/`, one JSON file per language. Adding a language needs
+no code changes:
+
+1. Copy `src/i18n/locales/en.json` to `src/i18n/locales/<code>.json`, where `<code>` is a
+   language code such as `de`, `pl` or `pt-BR`. The language menu shows its name automatically,
+   in that language.
+2. Translate the values. Keep the keys and the `{{placeholders}}` as they are.
+3. Plurals: English has `_one` and `_other` forms. Provide exactly the forms your language uses
+   (e.g. Polish needs `_one`, `_few`, `_many` and `_other`). If two forms read the same, repeat
+   the text.
+4. Run `npm test`. It checks every locale file and tells you what is missing or not allowed.
+
+Translations are plain text: no HTML, no links. Each language is downloaded only by people who
+use it.
+
 ## Versioning
 
 The project follows [Semantic Versioning](https://semver.org/). Changes are recorded in
