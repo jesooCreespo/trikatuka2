@@ -55,6 +55,7 @@ npx ng test --include src/transfer/engine.test.ts   # one unit test file
 npm run test:e2e     # end-to-end + accessibility tests (Playwright, fake Spotify)
 npx playwright test -g "Italian"                    # one e2e test
 npm run screenshots  # regenerate docs/screenshots/ (demo library, all languages/themes)
+npm run audit:prod   # npm audit of what ships to users (dev tools excluded)
 ```
 
 `npm start`, `build` and `test` first run `npm run i18n:sync`, which registers the files in
