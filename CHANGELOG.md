@@ -56,7 +56,7 @@ configuration and the UI flow all change.
 
 - Authentication.
 
-## [2.7] - 2024-01-22
+## [2.7] - 2025-01-22
 
 ### Added
 
@@ -73,19 +73,19 @@ configuration and the UI flow all change.
 
 - Transfer of tracks and albums.
 
-## [2.5]
+## [2.5] - 2019-01-01
 
 ### Changed
 
 - Playlists are transferred in the same order.
 
-## [2.4]
+## [2.4] - 2018-09-29
 
 ### Added
 
 - Transfer of albums and playlists.
 
-## [2.3]
+## [2.3] - 2016-04-18
 
 ### Added
 
@@ -95,3 +95,9 @@ configuration and the UI flow all change.
 
 - Moving playlists: requests are now made one by one, because concurrent requests caused
   `500` errors.
+
+[Unreleased]: https://github.com/aartek/trikatuka2/compare/v2.7...HEAD
+[2.7]: https://github.com/aartek/trikatuka2/compare/v2.5...v2.7
+[2.5]: https://github.com/aartek/trikatuka2/compare/2.4...v2.5
+[2.4]: https://github.com/aartek/trikatuka2/compare/v2.3...2.4
+[2.3]: https://github.com/aartek/trikatuka2/releases/tag/v2.3
