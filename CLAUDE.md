@@ -29,7 +29,7 @@ Run commands from Git Bash or PowerShell; no POSIX-only scripts are needed.
 **Layers** (each only depends on the ones above it):
 
 1. `src/lib/spotify/` — Web API access.
-   - `auth.ts`: PKCE login. `startLogin(slot)` opens the popup _synchronously_ (popup blockers), then stores verifier/state in **localStorage** (a popup gets a _copy_ of the opener's sessionStorage taken at open time, so sessionStorage would not work), then navigates the popup to Spotify. `afterLogin.html` → `src/afterLogin.ts` calls `completeLogin` and `postMessage`s tokens back (same origin only).
+   - `auth.ts`: PKCE login. `StepConnect` calls `prepareLogin(slot)` ahead of time (hashing is async); on click, `startLogin(prepared)` _synchronously_ writes verifier/state to **sessionStorage** and only then calls `window.open(authorizeUrl)` with a unique window name. Order matters: a popup gets a _copy_ of the opener's sessionStorage taken at open time, and `window.open` after an `await` risks the popup blocker. `afterLogin.html` → `src/afterLogin.ts` calls `completeLogin` (reads the popup's copy) and `postMessage`s tokens back (same origin only).
    - `client.ts`: the only `fetch` wrapper. Bearer token, refresh 60 s before expiry and once after a 401 (concurrent refreshes deduped), retries `429` (honours `Retry-After`) and 5xx with backoff. `onAuthLost` signs the slot out.
    - `endpoints.ts`: typed calls and per-request `LIMITS`.
 2. `src/lib/library.ts` — normalizes every category into `LibraryItem` and holds the copy-vs-follow rule (`playlistAction`: owned and not collaborative → copy, else follow).

@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, ArrowRight, Info, Loader2, LogOut } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -12,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { startLogin } from '@/lib/spotify/auth'
+import { prepareLogin, startLogin, type PreparedLogin } from '@/lib/spotify/auth'
 import type { Slot } from '@/lib/spotify/types'
 import { apiForAuth, useSession } from '@/state/session'
 import { useWizard } from '@/state/wizard'
@@ -28,15 +28,34 @@ export function StepConnect({ slot }: { slot: Slot }) {
   const goTo = useWizard((s) => s.goTo)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // A login is prepared ahead of time so the click can open the popup without awaiting.
+  const [prepared, setPrepared] = useState<PreparedLogin | null>(null)
+  const [attempt, setAttempt] = useState(0)
+
+  useEffect(() => {
+    let cancelled = false
+    prepareLogin(slot).then(
+      (p) => !cancelled && setPrepared(p),
+      (e: unknown) => !cancelled && setError(e instanceof Error ? e.message : String(e)),
+    )
+    return () => {
+      cancelled = true
+    }
+  }, [slot, attempt])
 
   const isOld = slot === 'old'
   const sameAsOther = account && other && account.profile.id === other.profile.id
 
   async function login() {
+    if (!prepared) return
+    // Synchronous, first thing in the click handler: see `startLogin`.
+    const pending = startLogin(prepared)
+    setPrepared(null)
+    setAttempt((n) => n + 1)
     setError(null)
     setBusy(true)
     try {
-      const auth = await startLogin(slot)
+      const auth = await pending
       const profile = await apiForAuth(auth).me()
       if (isOld && profile.id !== account?.profile.id) {
         // A different source account: the old selection and cached library no longer apply.
@@ -82,7 +101,12 @@ export function StepConnect({ slot }: { slot: Slot }) {
               </Button>
             </div>
           ) : (
-            <Button size="lg" className="w-full" onClick={() => void login()} disabled={busy}>
+            <Button
+              size="lg"
+              className="w-full"
+              onClick={() => void login()}
+              disabled={busy || !prepared}
+            >
               {busy && <Loader2 className="animate-spin" />}
               {busy ? t('connect.signingIn') : t('connect.signIn')}
             </Button>

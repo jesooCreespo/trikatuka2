@@ -4,10 +4,15 @@ import type { AuthData, Slot } from './types'
  * Spotify Authorization Code flow with PKCE. The app has no backend, so it can't keep a
  * client secret; PKCE replaces it with a one-time verifier generated per login.
  *
- * 1. `startLogin` stores verifier + state per slot and opens Spotify's consent page in a popup.
- * 2. Spotify redirects the popup to `/afterLogin` (see `src/afterLogin.ts`), which calls
+ * 1. `prepareLogin` computes verifier, state, challenge and the authorize URL ahead of time
+ *    (hashing is async), so that the click handler doesn't have to await anything.
+ * 2. On click, `startLogin` synchronously saves verifier + state to sessionStorage and only then
+ *    opens the popup. A popup opened with `window.open` starts with a *copy* of the opener's
+ *    sessionStorage taken at that moment, so it must be written before opening, and the
+ *    window.open call must not come after an `await` or popup blockers may stop it.
+ * 3. Spotify redirects the popup to `/afterLogin` (see `src/afterLogin.ts`), which calls
  *    `completeLogin` to exchange the code and posts the tokens back to the opener.
- * 3. `refreshAuth` renews tokens without any secret.
+ * 4. `refreshAuth` renews tokens without any secret.
  */
 
 export const SCOPES = [
@@ -53,15 +58,17 @@ export async function codeChallenge(verifier: string): Promise<string> {
     .replace(/\//g, '_')
 }
 
-/** Builds the authorize URL and remembers verifier + state for the callback. */
-export async function buildAuthorizeUrl(slot: Slot): Promise<string> {
+export interface PreparedLogin {
+  slot: Slot
+  verifier: string
+  state: string
+  url: string
+}
+
+/** Computes everything a login needs. No side effects; each result must be used only once. */
+export async function prepareLogin(slot: Slot): Promise<PreparedLogin> {
   const verifier = randomString(128)
   const state = `${slot}.${randomString(16)}`
-  // localStorage, not sessionStorage: the popup is opened before this runs (to dodge popup
-  // blockers) and gets a snapshot of the opener's sessionStorage, so it would never see it.
-  // The entry is single-use and removed by `completeLogin`.
-  localStorage.setItem(PKCE_KEY(slot), JSON.stringify({ verifier, state }))
-
   const params = new URLSearchParams({
     client_id: getClientId(),
     response_type: 'code',
@@ -73,19 +80,34 @@ export async function buildAuthorizeUrl(slot: Slot): Promise<string> {
     // Always show the consent dialog so the user can notice which account is signed in.
     show_dialog: 'true',
   })
-  return `${ACCOUNTS_URL}/authorize?${params.toString()}`
+  return { slot, verifier, state, url: `${ACCOUNTS_URL}/authorize?${params.toString()}` }
 }
 
-/** Opens the Spotify login popup and resolves with the tokens it posts back. */
-export function startLogin(slot: Slot): Promise<AuthData> {
-  // Open synchronously (inside the click handler) so popup blockers allow it.
-  const popup = window.open('', `spotify-login-${slot}`, 'width=520,height=760')
-  if (!popup) return Promise.reject(new Error('popup-blocked'))
+/** Stores verifier + state where the popup's `completeLogin` will find them. */
+export function savePendingLogin({ slot, verifier, state }: PreparedLogin) {
+  sessionStorage.setItem(PKCE_KEY(slot), JSON.stringify({ verifier, state }))
+}
+
+/**
+ * Opens the Spotify login popup and resolves with the tokens it posts back.
+ * Must be called synchronously from the click handler (no `await` before it).
+ */
+export function startLogin(prepared: PreparedLogin): Promise<AuthData> {
+  const { slot } = prepared
+  savePendingLogin(prepared)
+  // A unique name per attempt: reusing an already open popup would keep its old sessionStorage.
+  const popup = window.open(prepared.url, `spotify-login-${prepared.state}`, 'width=520,height=760')
+  if (!popup) {
+    sessionStorage.removeItem(PKCE_KEY(slot))
+    return Promise.reject(new Error('popup-blocked'))
+  }
 
   return new Promise<AuthData>((resolve, reject) => {
     const cleanup = () => {
       window.removeEventListener('message', onMessage)
       clearInterval(closedPoll)
+      // The popup has its own copy; the opener's one is no longer needed.
+      sessionStorage.removeItem(PKCE_KEY(slot))
     }
     const onMessage = (event: MessageEvent<AuthMessage>) => {
       if (event.origin !== window.location.origin) return
@@ -102,17 +124,6 @@ export function startLogin(slot: Slot): Promise<AuthData> {
       }
     }, 500)
     window.addEventListener('message', onMessage)
-
-    buildAuthorizeUrl(slot).then(
-      (url) => {
-        popup.location.href = url
-      },
-      (err: unknown) => {
-        cleanup()
-        popup.close()
-        reject(err instanceof Error ? err : new Error(String(err)))
-      },
-    )
   })
 }
 
@@ -164,8 +175,8 @@ export async function completeLogin(
   const error = params.get('error')
   if (error) throw Object.assign(new Error(error), { slot })
 
-  const stored = localStorage.getItem(PKCE_KEY(slot))
-  localStorage.removeItem(PKCE_KEY(slot))
+  const stored = sessionStorage.getItem(PKCE_KEY(slot))
+  sessionStorage.removeItem(PKCE_KEY(slot))
   const { verifier, state: expectedState } = stored
     ? (JSON.parse(stored) as { verifier: string; state: string })
     : { verifier: '', state: '' }
