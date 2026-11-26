@@ -32,6 +32,14 @@ export class Session {
     });
   }
 
+  /**
+   * Exchanges the two accounts (with their tokens): the old account becomes the new one and vice
+   * versa. No new login; per-slot API clients read the swapped tokens on their next request.
+   */
+  swap() {
+    this.state.update(({ accounts }) => ({ accounts: { old: accounts.new, new: accounts.old } }));
+  }
+
   signOut(slot: Slot) {
     this.state.update((s) => {
       const accounts = { ...s.accounts };

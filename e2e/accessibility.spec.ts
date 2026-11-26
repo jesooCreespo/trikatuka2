@@ -21,7 +21,8 @@ async function expectAccessible(page: Page, label: string) {
 
 async function signIn(page: Page) {
   const popup = page.waitForEvent('popup');
-  await page.getByRole('button', { name: 'Sign in with Spotify' }).click();
+  // The first free "Sign in" button: From, then To.
+  await page.getByRole('button', { name: 'Sign in with Spotify' }).first().click();
   await (await popup).waitForEvent('close');
 }
 
@@ -32,12 +33,12 @@ for (const colorScheme of ['light', 'dark'] as const) {
     const page = await context.newPage();
 
     await page.goto('/');
-    await expectAccessible(page, 'connect old');
+    await expectAccessible(page, 'connect');
     await signIn(page);
     await page.getByText('Alice', { exact: true }).waitFor();
-    await expectAccessible(page, 'connected');
-    await page.getByRole('button', { name: 'Continue' }).click();
     await signIn(page);
+    await page.getByText('Bob', { exact: true }).waitFor();
+    await expectAccessible(page, 'both connected');
     await page.getByRole('button', { name: 'Continue' }).click();
 
     await page.getByText('Road trip').waitFor();

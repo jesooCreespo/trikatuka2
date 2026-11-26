@@ -1,9 +1,10 @@
-import { computed, Service } from '@angular/core';
+import { computed, inject, Service } from '@angular/core';
 import { CATEGORIES, type Category, type LibraryItem } from '@/lib/library';
 import type { ItemResult, TransferOptions } from '@/transfer/engine';
 import { persistedSignal } from './persisted-signal';
+import { Session } from './session';
 
-export const STEPS = ['connect-old', 'connect-new', 'select', 'review', 'run', 'report'] as const;
+export const STEPS = ['connect', 'select', 'review', 'run', 'report'] as const;
 export type Step = (typeof STEPS)[number];
 
 /** Selected items per category, keyed by id so selection survives paging and filtering. */
@@ -14,20 +15,26 @@ const emptySelection = (): SelectionMap =>
 
 interface WizardState {
   step: Step;
-  selection: SelectionMap;
+  /**
+   * Selections per source account id. Swapping the accounts changes the source; swapping back
+   * finds the previous selection again.
+   */
+  selections: Record<string, SelectionMap>;
   options: TransferOptions;
   results: ItemResult[];
 }
 
 @Service()
 export class Wizard {
+  private readonly session = inject(Session);
   private readonly state = persistedSignal<WizardState>(
     () => sessionStorage,
     'trikatuka:wizard',
-    1,
+    // v2: one "connect" step and selections per source account.
+    2,
     {
-      step: 'connect-old',
-      selection: emptySelection(),
+      step: 'connect',
+      selections: {},
       options: { keepOrder: false, skipDuplicates: true },
       results: [],
     },
@@ -41,8 +48,11 @@ export class Wizard {
     }),
   );
 
+  private readonly sourceId = computed(() => this.session.accounts().old?.profile.id ?? '');
+
   readonly step = computed(() => this.state().step);
-  readonly selection = computed(() => this.state().selection);
+  /** Selection for the current source account. */
+  readonly selection = computed(() => this.state().selections[this.sourceId()] ?? emptySelection());
   readonly options = computed(() => this.state().options);
   readonly results = computed(() => this.state().results);
   readonly selectedItems = computed(() => selectedItems(this.selection()));
@@ -59,18 +69,16 @@ export class Wizard {
   }
 
   setSelected(category: Category, items: LibraryItem[], selected: boolean) {
-    this.state.update((s) => {
-      const current = { ...s.selection[category] };
-      for (const item of items) {
-        if (selected) current[item.id] = item;
-        else delete current[item.id];
-      }
-      return { ...s, selection: { ...s.selection, [category]: current } };
-    });
+    const current = { ...this.selection()[category] };
+    for (const item of items) {
+      if (selected) current[item.id] = item;
+      else delete current[item.id];
+    }
+    this.setSelection({ ...this.selection(), [category]: current });
   }
 
   clearSelection() {
-    this.state.update((s) => ({ ...s, selection: emptySelection() }));
+    this.setSelection(emptySelection());
   }
 
   setOption<K extends keyof TransferOptions>(key: K, value: TransferOptions[K]) {
@@ -89,7 +97,12 @@ export class Wizard {
         selection[r.item.category][r.item.id] = r.item;
       }
     }
-    this.state.update((s) => ({ ...s, selection }));
+    this.setSelection(selection);
+  }
+
+  private setSelection(selection: SelectionMap) {
+    const source = this.sourceId();
+    this.state.update((s) => ({ ...s, selections: { ...s.selections, [source]: selection } }));
   }
 }
 

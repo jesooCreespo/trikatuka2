@@ -6,7 +6,8 @@ test.use({ locale: 'en-US' });
 
 async function signIn(page: Page) {
   const popup = page.waitForEvent('popup');
-  await page.getByRole('button', { name: 'Sign in with Spotify' }).click();
+  // The first free "Sign in" button: From, then To.
+  await page.getByRole('button', { name: 'Sign in with Spotify' }).first().click();
   await (await popup).waitForEvent('close');
 }
 
@@ -20,13 +21,10 @@ test('transfers selected playlists and liked songs to the new account', async ({
   page.on('request', (r) => r.url().includes('googlesyndication') && adRequests.push(r.url()));
   await page.goto('/');
 
-  // Step 1–2: connect both accounts.
-  await expect(page.getByRole('heading', { name: 'Connect your old account' })).toBeVisible();
+  // Step 1: connect both accounts.
+  await expect(page.getByRole('heading', { name: 'Connect your accounts' })).toBeVisible();
   await signIn(page);
   await expect(page.getByText('Alice', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Continue' }).click();
-
-  await expect(page.getByRole('heading', { name: 'Connect your new account' })).toBeVisible();
   await signIn(page);
   await expect(page.getByText('Bob', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Continue' }).click();
@@ -72,7 +70,6 @@ test('keeps the order of liked songs, timing the pauses in a worker', async ({ p
   const spotify = await installFakeSpotify(context, { writeDelayMs: 400 });
   await page.goto('/');
   await signIn(page);
-  await page.getByRole('button', { name: 'Continue' }).click();
   await signIn(page);
   await page.getByRole('button', { name: 'Continue' }).click();
 
@@ -102,7 +99,7 @@ test('shows the Italian UI when the browser is in Italian', async ({ browser }) 
   const context = await browser.newContext({ locale: 'it-IT' });
   const page = await context.newPage();
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Collega il tuo account vecchio' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Collega i tuoi account' })).toBeVisible();
   await context.close();
 });
 
@@ -110,7 +107,7 @@ test('switches language from the menu, loading it on demand, and remembers it', 
   page,
 }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Connect your old account' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Connect your accounts' })).toBeVisible();
 
   // Italian isn't in the initial bundle: choosing it downloads its own chunk.
   await page.waitForLoadState('networkidle');
@@ -118,12 +115,12 @@ test('switches language from the menu, loading it on demand, and remembers it', 
   page.on('response', (r) => r.url().endsWith('.js') && scripts.push(r.url()));
   await page.getByRole('button', { name: 'Language' }).click();
   await page.getByRole('menuitemradio', { name: 'Italiano' }).click();
-  await expect(page.getByRole('heading', { name: 'Collega il tuo account vecchio' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Collega i tuoi account' })).toBeVisible();
   await expect(page.locator('html')).toHaveAttribute('lang', 'it');
   expect(scripts.length).toBeGreaterThan(0);
 
   await page.reload();
-  await expect(page.getByRole('heading', { name: 'Collega il tuo account vecchio' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Collega i tuoi account' })).toBeVisible();
 });
 
 test('shows the privacy policy inside the app, also from its old address', async ({ browser }) => {
@@ -175,7 +172,6 @@ test('loads and copies large libraries page by page, in order', async ({ page, c
   });
   await page.goto('/');
   await signIn(page);
-  await page.getByRole('button', { name: 'Continue' }).click();
   await signIn(page);
   await page.getByRole('button', { name: 'Continue' }).click();
 
@@ -212,7 +208,6 @@ test('shows the progress of each playlist while transferring', async ({ page, co
   });
   await page.goto('/');
   await signIn(page);
-  await page.getByRole('button', { name: 'Continue' }).click();
   await signIn(page);
   await page.getByRole('button', { name: 'Continue' }).click();
 
@@ -248,4 +243,58 @@ test('shows the progress of each playlist while transferring', async ({ page, co
   await expect(page.getByRole('heading', { name: 'Transfer finished' })).toBeVisible({
     timeout: 15_000,
   });
+});
+
+test('swaps the accounts without reloading what was already loaded', async ({ page, context }) => {
+  await installFakeSpotify(context);
+  // Count library reads per account (the fake tells accounts apart by their token).
+  const reads: string[] = [];
+  page.on('request', (r) => {
+    const url = new URL(r.url());
+    if (url.hostname === 'api.spotify.com' && url.pathname === '/v1/me/playlists') {
+      reads.push((r.headers()['authorization'] ?? '').endsWith('tok-old') ? 'alice' : 'bob');
+    }
+  });
+
+  await page.goto('/');
+  await signIn(page);
+  await signIn(page);
+  const from = page.locator('app-account-card', { hasText: 'From: old account' });
+  const to = page.locator('app-account-card', { hasText: 'To: new account' });
+  await expect(from.getByText('Alice', { exact: true })).toBeVisible();
+  await expect(to.getByText('Bob', { exact: true })).toBeVisible();
+
+  // Alice's library, and a selection from it.
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await page.getByText('Road trip', { exact: true }).click();
+  await expect(page.getByText('1 item selected')).toBeVisible();
+  expect(reads).toEqual(['alice']);
+
+  // Swap: Bob becomes the source (his library is empty in the fake) and From/To trade places.
+  await page.getByRole('button', { name: 'Back' }).click();
+  await page.getByRole('button', { name: 'Swap accounts' }).click();
+  await expect(from.getByText('Bob', { exact: true })).toBeVisible();
+  await expect(to.getByText('Alice', { exact: true })).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: 'Accounts swapped' })).toHaveText(
+    'Accounts swapped: from Bob to Alice',
+  );
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await expect(page.getByText('Nothing in this section.')).toBeVisible();
+  await expect(page.getByText('Select at least one item to continue.')).toBeVisible();
+  expect(reads).toEqual(['alice', 'bob']);
+
+  // Swap back: Alice's library and selection come back with no new request to Spotify.
+  await page.getByRole('button', { name: 'Back' }).click();
+  await page.getByRole('button', { name: 'Swap accounts' }).click();
+  await expect(from.getByText('Alice', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await expect(page.getByText('Road trip', { exact: true })).toBeVisible();
+  await expect(page.getByText('1 item selected')).toBeVisible();
+  expect(reads).toEqual(['alice', 'bob']);
+
+  // The review shows the direction of the transfer.
+  await page.getByRole('button', { name: 'Continue' }).click();
+  const review = page.locator('app-step-review');
+  await expect(review.getByText('Alice', { exact: true })).toBeVisible();
+  await expect(review.locator('section').first()).toContainText('Alice');
 });

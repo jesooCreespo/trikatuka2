@@ -37,8 +37,18 @@ const FLOWS: Flow[] = [
   { lang: 'en', theme: 'dark', device: 'desktop', shots: SHOTS },
   { lang: 'it', theme: 'light', device: 'desktop', shots: SHOTS },
   { lang: 'it', theme: 'dark', device: 'desktop', shots: SHOTS },
-  { lang: 'en', theme: 'light', device: 'mobile', shots: ['2-select-playlists', '6-report'] },
-  { lang: 'it', theme: 'dark', device: 'mobile', shots: ['2-select-playlists', '6-report'] },
+  {
+    lang: 'en',
+    theme: 'light',
+    device: 'mobile',
+    shots: ['1-connect', '2-select-playlists', '6-report'],
+  },
+  {
+    lang: 'it',
+    theme: 'dark',
+    device: 'mobile',
+    shots: ['1-connect', '2-select-playlists', '6-report'],
+  },
 ];
 
 const VIEWPORTS = {
@@ -71,7 +81,8 @@ function translator(lang: Lang) {
 
 async function signIn(page: Page, label: string) {
   const popup = page.waitForEvent('popup');
-  await page.getByRole('button', { name: label }).click();
+  // The first free "Sign in" button: From, then To.
+  await page.getByRole('button', { name: label }).first().click();
   await (await popup).waitForEvent('close');
 }
 
@@ -114,9 +125,11 @@ for (const flow of FLOWS) {
     // middle of the image. Only in screenshots, keep them in the normal flow.
     await page.addStyleTag({ content: 'header, .sticky { position: static !important; }' });
     await signIn(page, t('connect.signIn'));
-    await continueButton().click();
     await signIn(page, t('connect.signIn'));
-    await page.getByText(t('connect.connectedAs')).waitFor();
+    await page
+      .getByRole('button', { name: t('connect.signOut') })
+      .nth(1)
+      .waitFor();
     await shot('1-connect');
     await continueButton().click();
 

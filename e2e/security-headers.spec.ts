@@ -110,7 +110,8 @@ async function guard(context: BrowserContext, baseURL: string): Promise<Guard> {
 
 async function signIn(page: Page) {
   const popup = page.waitForEvent('popup');
-  await page.getByRole('button', { name: 'Sign in with Spotify' }).click();
+  // The first free "Sign in" button: From, then To.
+  await page.getByRole('button', { name: 'Sign in with Spotify' }).first().click();
   await (await popup).waitForEvent('close');
 }
 
@@ -143,7 +144,6 @@ test('the whole transfer works under the security headers', async ({ context, pa
 
   await signIn(page);
   await expect(page.getByText('Alice', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Continue' }).click();
   await signIn(page);
   await expect(page.getByText('Bob', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Continue' }).click();
@@ -189,7 +189,6 @@ test('keep-order pauses run in the timer worker under the security headers', asy
 
   await page.goto('/');
   await signIn(page);
-  await page.getByRole('button', { name: 'Continue' }).click();
   await signIn(page);
   await page.getByRole('button', { name: 'Continue' }).click();
 
@@ -242,7 +241,7 @@ test('the theme script still applies dark mode before first paint', async ({
 test('the policy is enforced: other origins are blocked', async ({ context, page, baseURL }) => {
   const result = await guard(context, baseURL!);
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Connect your old account' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Connect your accounts' })).toBeVisible();
   await page.evaluate(async () => {
     const img = document.createElement('img');
     img.src = 'https://example.com/pixel.png';

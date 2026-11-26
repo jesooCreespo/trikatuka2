@@ -11,8 +11,7 @@
     "skipToContent": "Vai al contenuto"
   },
   "steps": {
-    "connect-old": "Account vecchio",
-    "connect-new": "Account nuovo",
+    "connect": "Account",
     "select": "Scegli",
     "review": "Riepilogo",
     "run": "Trasferimento",
@@ -20,9 +19,7 @@
     "progress": "Passo {{current}} di {{total}}"
   },
   "connect": {
-    "oldTitle": "Collega il tuo account vecchio",
     "oldBody": "È l'account da cui ti stai spostando. Trikatuka lo legge soltanto.",
-    "newTitle": "Collega il tuo account nuovo",
     "newBody": "È l'account in cui verrà aggiunta la libreria. Da nessuno dei due account viene rimosso nulla.",
     "signIn": "Accedi con Spotify",
     "signingIn": "In attesa di Spotify…",
@@ -35,7 +32,13 @@
     "popupClosed": "La finestra di login è stata chiusa prima di finire.",
     "loginFailed": "Accesso non riuscito: {{message}}",
     "continue": "Continua",
-    "back": "Indietro"
+    "back": "Indietro",
+    "title": "Collega i tuoi account",
+    "body": "Accedi con l'account da cui ti sposti e con quello in cui ti sposti. Da nessuno dei due account viene rimosso nulla.",
+    "oldCard": "Da: account vecchio",
+    "newCard": "A: account nuovo",
+    "swap": "Inverti gli account",
+    "swapped": "Account invertiti: da {{from}} a {{to}}"
   },
   "categories": {
     "playlists": "Playlist",

@@ -4,6 +4,8 @@ import { provideIcons } from '@ng-icons/core';
 import {
   lucideArrowLeft,
   lucideArrowRight,
+  lucideArrowRightLeft,
+  lucideArrowUpDown,
   lucideCheck,
   lucideChevronDown,
   lucideCircle,
@@ -45,6 +47,8 @@ export const appConfig: ApplicationConfig = {
     provideIcons({
       lucideArrowLeft,
       lucideArrowRight,
+      lucideArrowRightLeft,
+      lucideArrowUpDown,
       lucideCheck,
       lucideChevronDown,
       lucideCircle,

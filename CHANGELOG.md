@@ -12,8 +12,10 @@ configuration and the UI flow all change.
 
 ### Added
 
-- Guided six-step wizard: connect the old account, connect the new account, choose, review,
-  transfer, report.
+- Guided five-step wizard: connect the accounts, choose, review, transfer, report.
+- Both accounts are connected in one step, with a button to swap them (animated where the browser
+  supports it). Swapping back reloads nothing from Spotify, and the selection is kept per source
+  account.
 - Selection of individual liked songs, albums, artists and podcasts. Before, only playlists could
   be picked one by one; everything else was "transfer all".
 - Search in every section, and a filter for playlists that will be copied or followed.

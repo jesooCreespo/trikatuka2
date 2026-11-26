@@ -12,8 +12,7 @@ import { Stepper } from './stepper';
 /** The step that is actually allowed, given which accounts are connected. */
 function allowedStep(step: Step, hasOld: boolean, hasNew: boolean, running: boolean): Step {
   if (running) return 'run';
-  if (!hasOld) return 'connect-old';
-  if (!hasNew && step !== 'connect-old') return 'connect-new';
+  if (!hasOld || !hasNew) return 'connect';
   if (step === 'run') return 'report';
   return step;
 }
@@ -25,11 +24,8 @@ function allowedStep(step: Step, hasOld: boolean, hasNew: boolean, running: bool
   template: `
     <app-stepper [current]="current()" />
     @switch (current()) {
-      @case ('connect-old') {
-        <app-step-connect slot="old" />
-      }
-      @case ('connect-new') {
-        <app-step-connect slot="new" />
+      @case ('connect') {
+        <app-step-connect />
       }
       @case ('select') {
         <app-step-select />

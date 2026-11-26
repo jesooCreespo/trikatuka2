@@ -49,7 +49,7 @@ import { CategoryIcon } from './shared';
     <div
       class="bg-background/90 sticky bottom-0 -mx-4 flex items-center justify-between gap-3 border-t px-4 py-3 backdrop-blur"
     >
-      <button hlmBtn variant="ghost" (click)="wizard.goTo('connect-new')">
+      <button hlmBtn variant="ghost" (click)="wizard.goTo('connect')">
         <ng-icon name="lucideArrowLeft" />
         {{ i18n.t('connect.back') }}
       </button>
