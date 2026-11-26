@@ -12,6 +12,7 @@ where anything else (habits, older docs, other projects) disagrees with them, th
 
 @docs/angular/best-practices.md
 
-- `docs/angular/llms-full.txt` (the complete Angular documentation, ~865 KB) is too large to load
-  in every session. **Read it in full, not excerpts, before writing or changing Angular code**
-  (components, services, routing, templates, tests, build configuration) in a session.
+- `docs/angular/llms-full.txt` (the complete Angular documentation, ~865 KB) is the reference to
+  consult whenever a question about Angular comes up: an API, a pattern, configuration, testing,
+  the build. Don't load it in full; find the relevant sections and read them completely. Its
+  headings work as an index: `grep -n "^#" docs/angular/llms-full.txt`.
