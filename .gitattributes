@@ -1,0 +1,4 @@
+# Vendored reference files must stay byte-identical to their source (see docs/angular/SOURCE.md).
+docs/angular/*.md -text
+docs/angular/*.txt -text
+docs/angular/SOURCE.md text
