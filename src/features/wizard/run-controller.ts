@@ -1,6 +1,8 @@
 import { toast } from 'sonner'
 import { create } from 'zustand'
 import i18n from '@/i18n'
+import { workerSleep } from '@/lib/timers/worker-sleep'
+import { keepScreenAwake } from '@/lib/wake-lock'
 import { runTransfer, type ItemResult } from '@/transfer/engine'
 import { getApi, useSession } from '@/state/session'
 import { selectedItems, useWizard } from '@/state/wizard'
@@ -52,6 +54,9 @@ export async function startRun() {
   goTo('run')
 
   const updates = throttled(setResults)
+  // Keep the screen awake while it runs; pauses between writes run in a worker so they aren't
+  // throttled when the tab is in the background.
+  const releaseWakeLock = keepScreenAwake()
   try {
     const results = await runTransfer(selectedItems(selection), options, {
       source: getApi('old'),
@@ -60,6 +65,7 @@ export async function startRun() {
       targetUserId: accounts.new.profile.id,
       signal: controller.signal,
       onUpdate: updates.push,
+      sleep: workerSleep,
     })
     updates.flush()
     setResults(results)
@@ -67,6 +73,7 @@ export async function startRun() {
     updates.flush()
     toast.error(error instanceof Error ? error.message : String(error))
   } finally {
+    releaseWakeLock()
     controller = null
     useRun.setState({ running: false, stopping: false })
     useWizard.getState().goTo('report')

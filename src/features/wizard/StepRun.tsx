@@ -1,4 +1,4 @@
-import { Loader2, Square } from 'lucide-react'
+import { Info, Loader2, Square } from 'lucide-react'
 import { useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -39,6 +39,10 @@ export function StepRun() {
   const { t } = useTranslation()
   const results = useWizard((s) => s.results)
   const stopping = useRun((s) => s.stopping)
+  // "Keep order" saves liked songs one per second: tell the user why it is slow.
+  const slowByDesign = useWizard(
+    (s) => s.options.keepOrder && Object.keys(s.selection.tracks).length > 0,
+  )
 
   useEffect(() => {
     const warn = (e: BeforeUnloadEvent) => e.preventDefault()
@@ -61,6 +65,15 @@ export function StepRun() {
         <CardDescription>{t('run.subtitle')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {slowByDesign && (
+          <div className="flex gap-3 rounded-lg border p-4 text-sm">
+            <Info className="text-primary mt-0.5 size-4 shrink-0" aria-hidden />
+            <div className="space-y-1">
+              <p className="font-medium">{t('run.keepOrderTitle')}</p>
+              <p className="text-muted-foreground">{t('run.keepOrderNote')}</p>
+            </div>
+          </div>
+        )}
         <div className="space-y-2" role="status" aria-live="polite">
           <div className="flex items-baseline justify-between text-sm">
             <span className="text-muted-foreground truncate">
@@ -70,7 +83,7 @@ export function StepRun() {
               {t('run.overall', { done, total: results.length })}
             </span>
           </div>
-          <Progress value={pct} className="h-3" />
+          <Progress value={pct} className="h-3" aria-label={t('run.overallLabel')} />
         </div>
 
         <ul className="space-y-3">
@@ -85,7 +98,11 @@ export function StepRun() {
                   {t('run.overall', { done, total })}
                 </span>
               </div>
-              <Progress value={(done / total) * 100} className="h-1.5" />
+              <Progress
+                value={(done / total) * 100}
+                className="h-1.5"
+                aria-label={t(`categories.${category}`)}
+              />
             </li>
           ))}
         </ul>

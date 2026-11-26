@@ -105,7 +105,10 @@
     "stop": "Stop",
     "stopping": "Stopping…",
     "current": "Now: {{name}}",
-    "preparing": "Preparing…"
+    "preparing": "Preparing…",
+    "overallLabel": "Overall progress",
+    "keepOrderTitle": "Liked songs are saved one at a time",
+    "keepOrderNote": "This is slow on purpose, so your liked songs keep their order. Keep this tab open and don't let your computer go to sleep; you can use other tabs in the meantime."
   },
   "report": {
     "titleDone": "Transfer finished",

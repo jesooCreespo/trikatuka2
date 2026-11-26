@@ -28,6 +28,10 @@ configuration and the UI flow all change.
 - Automatic retry on Spotify rate limits (`429` with `Retry-After`) and server errors.
 - Optional Google AdSense banner, off by default. It is enabled and configured with
   `VITE_ADSENSE_*` variables; when off, no Google script is loaded.
+- While a transfer runs, the screen is kept awake (Screen Wake Lock, where the browser supports
+  it) so the computer doesn't go to sleep mid-transfer.
+- The transfer step explains that keeping the order of liked songs is slow by design and that the
+  tab should stay open and the computer awake.
 - Unit tests (Vitest) and end-to-end tests (Playwright) against a fake Spotify.
 - Automated accessibility checks: an end-to-end test runs axe-core (WCAG 2.2 AA) on every wizard
   step, the confirmation dialog, the help page and the privacy policy, in light and dark themes.
@@ -48,6 +52,9 @@ configuration and the UI flow all change.
 - The Spotify client ID is configured with `VITE_SPOTIFY_CLIENT_ID` (`.env.*` files).
 - Local development runs on `http://127.0.0.1:5173` with no self-signed certificate.
 - The version shown in the footer comes from `package.json`.
+- Large libraries load faster: liked songs, playlists, albums, podcasts and playlist contents are
+  read a few pages at a time (up to 3 requests in parallel) instead of one page at a time, keeping
+  Spotify's order. Followed artists and all writes are still sequential.
 
 ### Removed
 
@@ -59,6 +66,10 @@ configuration and the UI flow all change.
 
 - Transfers no longer fail on endpoints that Spotify removed in February 2026.
 - Local files are skipped when copying a playlist instead of making the request fail.
+- Long "keep order" transfers no longer slow to a crawl when the tab is in the background: the
+  pauses between saves run in a Web Worker, which browsers don't throttle like timers in hidden
+  tabs (Chrome ran them at most once per minute).
+- The transfer step's progress bars have accessible names.
 - Accessibility (WCAG 2.2 AA):
   - Text contrast: the light theme's green (buttons, links, badges, focus ring) and red are
     darker, the dark theme's red is lighter.

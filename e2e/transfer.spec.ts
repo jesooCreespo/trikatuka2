@@ -1,5 +1,6 @@
+import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
-import { installFakeSpotify } from './fake-spotify'
+import { installFakeSpotify, TEST_LIBRARY } from './fake-spotify'
 
 test.use({ locale: 'en-US' })
 
@@ -111,4 +112,79 @@ test('the help page and the OAuth callback route are served', async ({ page }) =
   // Opened directly (no popup opener), the callback page sends the user home.
   await page.goto('/afterLogin?error=access_denied&state=old.x')
   await expect(page).toHaveURL('/')
+})
+
+test('keeps the order of liked songs, timing the pauses in a worker', async ({ page, context }) => {
+  // Slow writes keep the run step on screen long enough to check it.
+  const spotify = await installFakeSpotify(context, { writeDelayMs: 400 })
+  await page.goto('/')
+  await signIn(page)
+  await page.getByRole('button', { name: 'Continue' }).click()
+  await signIn(page)
+  await page.getByRole('button', { name: 'Continue' }).click()
+
+  await page.getByRole('tab', { name: /Liked songs/ }).click()
+  await page.getByRole('button', { name: 'Select all (3)' }).click()
+  await page.getByRole('button', { name: 'Continue' }).click()
+  await page.getByLabel('Keep the order of liked songs').click()
+
+  // The 1 s pauses between saves run in a dedicated worker (not throttled in background tabs).
+  const worker = page.waitForEvent('worker')
+  await page.getByRole('button', { name: 'Start transfer' }).click()
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Start transfer' }).click()
+  expect((await worker).url()).toMatch(/\/timer\.worker-[\w-]+\.js(\?|$)/)
+
+  await expect(page.getByText('Liked songs are saved one at a time')).toBeVisible()
+  const { violations } = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+    .analyze()
+  expect(violations.map((v) => v.id)).toEqual([])
+
+  await expect(page.getByRole('heading', { name: 'Transfer finished' })).toBeVisible()
+  // One song per request, oldest first.
+  expect(spotify.saved).toEqual(['spotify:track:t3', 'spotify:track:t2', 'spotify:track:t1'])
+})
+
+test('loads and copies large libraries page by page, in order', async ({ page, context }) => {
+  // Several pages of 50, read a few at a time: each must arrive once, in Spotify's order.
+  const uris = Array.from({ length: 237 }, (_, i) => `spotify:track:p${i}`)
+  const spotify = await installFakeSpotify(context, {
+    library: {
+      ...TEST_LIBRARY,
+      playlists: [{ ...TEST_LIBRARY.playlists[0]!, items: { total: uris.length } }],
+      playlistItems: {
+        mine: uris.map((uri) => ({ added_at: '', is_local: false, item: { uri } })),
+      },
+      tracks: Array.from({ length: 180 }, (_, i) => ({
+        added_at: '',
+        track: {
+          id: `s${i}`,
+          name: `Track ${i}`,
+          uri: `spotify:track:s${i}`,
+          type: 'track',
+          artists: [{ id: 'a', name: 'Band', uri: 'spotify:artist:a' }],
+          album: { name: 'Album', images: [] },
+        },
+      })),
+    },
+  })
+  await page.goto('/')
+  await signIn(page)
+  await page.getByRole('button', { name: 'Continue' }).click()
+  await signIn(page)
+  await page.getByRole('button', { name: 'Continue' }).click()
+
+  await expect(page.getByText('Road trip')).toBeVisible()
+  await page.getByRole('button', { name: 'Select all (1)' }).click()
+  await page.getByRole('tab', { name: /Liked songs/ }).click()
+  const songs = page.getByRole('tabpanel', { name: /Liked songs/ })
+  await expect(songs.getByRole('button', { name: 'Select all (180)' })).toBeVisible()
+  await page.getByRole('button', { name: 'Continue' }).click()
+
+  await page.getByRole('button', { name: 'Start transfer' }).click()
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Start transfer' }).click()
+  await expect(page.getByRole('heading', { name: 'Transfer finished' })).toBeVisible()
+
+  expect(spotify.added.map((a) => a.uris.length)).toEqual([100, 100, 37])
+  expect(spotify.added.flatMap((a) => a.uris)).toEqual(uris)
 })

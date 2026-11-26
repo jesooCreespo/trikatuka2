@@ -63,12 +63,14 @@ export async function loadCategory(
 ): Promise<LibraryItem[]> {
   switch (category) {
     case 'playlists': {
-      const playlists = await fetchAllOffset((o) => api.myPlaylists(o, signal), onProgress)
+      const playlists = await fetchAllOffset((o) => api.myPlaylists(o, signal), onProgress, {
+        signal,
+      })
       // Spotify can return null entries for playlists that are no longer available.
       return playlists.filter(Boolean).map(playlistToItem)
     }
     case 'tracks': {
-      const saved = await fetchAllOffset((o) => api.savedTracks(o, signal), onProgress)
+      const saved = await fetchAllOffset((o) => api.savedTracks(o, signal), onProgress, { signal })
       return saved
         .filter((s) => s.track?.id && !s.track.is_local)
         .map(({ track }) => ({
@@ -83,7 +85,7 @@ export async function loadCategory(
         }))
     }
     case 'albums': {
-      const saved = await fetchAllOffset((o) => api.savedAlbums(o, signal), onProgress)
+      const saved = await fetchAllOffset((o) => api.savedAlbums(o, signal), onProgress, { signal })
       return saved.map(({ album }) => ({
         category,
         id: album.id,
@@ -108,7 +110,7 @@ export async function loadCategory(
       }))
     }
     case 'shows': {
-      const saved = await fetchAllOffset((o) => api.savedShows(o, signal), onProgress)
+      const saved = await fetchAllOffset((o) => api.savedShows(o, signal), onProgress, { signal })
       return saved.map(({ show }) => ({
         category,
         id: show.id,
