@@ -8,6 +8,7 @@ import { CATEGORIES, type Category } from '@/lib/library'
 import { useWizard } from '@/state/wizard'
 import type { ItemResult } from '@/transfer/engine'
 import { CategoryIcon } from './CategoryIcon'
+import { RunDetails } from './RunDetails'
 import { stopRun, useRun } from './run-controller'
 
 const isDone = (s: string) => s !== 'pending' && s !== 'running'
@@ -52,6 +53,16 @@ export function StepRun() {
 
   const { perCategory, done, current } = useMemo(() => progressOf(results), [results])
   const pct = results.length ? (done / results.length) * 100 : 0
+  // With "keep order", liked songs go one per second (plus the request itself), so the remaining
+  // time can be estimated. Other transfers are too fast or too variable to estimate.
+  const keepOrder = useWizard((s) => s.options.keepOrder)
+  const etaMinutes = useMemo(() => {
+    if (!keepOrder) return 0
+    const remaining = results.filter(
+      (r) => r.item.category === 'tracks' && (r.status === 'pending' || r.status === 'running'),
+    ).length
+    return remaining ? Math.ceil((remaining * 1.2) / 60) : 0
+  }, [keepOrder, results])
 
   return (
     <Card className="mx-auto max-w-2xl">
@@ -84,6 +95,9 @@ export function StepRun() {
             </span>
           </div>
           <Progress value={pct} className="h-3" aria-label={t('run.overallLabel')} />
+          {etaMinutes > 0 && (
+            <p className="text-muted-foreground text-xs">{t('run.eta', { count: etaMinutes })}</p>
+          )}
         </div>
 
         <ul className="space-y-3">
@@ -106,6 +120,8 @@ export function StepRun() {
             </li>
           ))}
         </ul>
+
+        <RunDetails results={results} />
 
         <div className="flex justify-end">
           <Button variant="outline" onClick={stopRun} disabled={stopping}>

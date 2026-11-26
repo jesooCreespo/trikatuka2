@@ -19,6 +19,9 @@ configuration and the UI flow all change.
 - Search in every section, and a filter for playlists that will be copied or followed.
 - "Skip what the new account already has" option, on by default.
 - Live progress, overall and per section, and a button to stop the transfer.
+- Per-item progress while transferring: each playlist shows its status and the phase being copied
+  ("Adding 200 of 437"), every other item its status, in collapsible sections. With "keep order",
+  the remaining time is estimated.
 - Final report with per-item results, "retry failed items" and a JSON report download.
 - JSON backup of the old account's library, including the items of owned playlists.
 - Italian translation, with language selection (detected from the browser).

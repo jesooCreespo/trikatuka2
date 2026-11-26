@@ -188,3 +188,59 @@ test('loads and copies large libraries page by page, in order', async ({ page, c
   expect(spotify.added.map((a) => a.uris.length)).toEqual([100, 100, 37])
   expect(spotify.added.flatMap((a) => a.uris)).toEqual(uris)
 })
+
+test('shows the progress of each playlist while transferring', async ({ page, context }) => {
+  const uris = Array.from({ length: 237 }, (_, i) => `spotify:track:p${i}`)
+  // Slow writes keep the run step on screen long enough to follow each playlist.
+  await installFakeSpotify(context, {
+    writeDelayMs: 500,
+    library: {
+      ...TEST_LIBRARY,
+      playlists: [
+        { ...TEST_LIBRARY.playlists[0]!, items: { total: uris.length } },
+        TEST_LIBRARY.playlists[1]!,
+      ],
+      playlistItems: {
+        mine: uris.map((uri) => ({ added_at: '', is_local: false, item: { uri } })),
+      },
+    },
+  })
+  await page.goto('/')
+  await signIn(page)
+  await page.getByRole('button', { name: 'Continue' }).click()
+  await signIn(page)
+  await page.getByRole('button', { name: 'Continue' }).click()
+
+  await page.getByRole('button', { name: 'Select all (2)' }).click()
+  await page.getByRole('tab', { name: /Liked songs/ }).click()
+  await page
+    .getByRole('tabpanel', { name: /Liked songs/ })
+    .getByText('Song 1', { exact: true })
+    .click()
+  await page.getByRole('button', { name: 'Continue' }).click()
+  await page.getByRole('button', { name: 'Start transfer' }).click()
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Start transfer' }).click()
+
+  // Playlists are open by default; the one being copied shows its phase and a bar.
+  const playlists = page.locator('details', { hasText: 'Playlists' })
+  await expect(playlists).toHaveAttribute('open', '')
+  await expect(playlists.getByText(/^Adding \d+ of 237$/)).toBeVisible()
+  await expect(playlists.getByRole('progressbar', { name: /^Adding \d+ of 237$/ })).toBeVisible()
+  // The followed playlist (processed first, oldest first) already shows its outcome.
+  await expect(playlists.getByText('Followed')).toBeVisible()
+
+  // Other sections are collapsed until opened.
+  const songs = page.locator('details', { hasText: 'Liked songs' })
+  await expect(songs).not.toHaveAttribute('open', '')
+  await songs.locator('summary').click()
+  await expect(songs.getByText('Song 1')).toBeVisible()
+
+  const { violations } = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+    .analyze()
+  expect(violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target).join(' ')}`)).toEqual([])
+
+  await expect(page.getByRole('heading', { name: 'Transfer finished' })).toBeVisible({
+    timeout: 15_000,
+  })
+})

@@ -14,7 +14,18 @@ export interface ItemResult {
   /** For copied playlists: how many items were added / left out. */
   added?: number
   omitted?: number
+  /** While a playlist is being copied: the current phase and its counts. */
+  progress?: CopyProgress
 }
+
+/**
+ * Copying a playlist reads its items (pages of 50), creates the copy, then adds the items
+ * (blocks of 100). `done`/`total` count items; `creating` has no counts.
+ */
+export type CopyProgress =
+  | { phase: 'reading'; done: number; total: number }
+  | { phase: 'creating' }
+  | { phase: 'adding'; done: number; total: number }
 
 export interface TransferOptions {
   /** Saved tracks one by one, one second apart, so the target keeps the original order. */
@@ -66,7 +77,7 @@ class RunState {
     const pending = this.results.filter((r) => r.status === 'pending' || r.status === 'running')
     this.set(
       pending.map((r) => r.item),
-      { status, reason },
+      { status, reason, progress: undefined },
     )
   }
 
@@ -211,12 +222,20 @@ async function transferPlaylists(
         await target.saveToLibrary([item.uri], signal)
         state.set([item], { status: 'ok', reason: 'result.followed' })
       } else {
-        const { added, omitted } = await copyPlaylist(item, source, target, signal)
-        state.set([item], { status: 'ok', reason: 'result.copied', added, omitted })
+        const { added, omitted } = await copyPlaylist(item, source, target, signal, (progress) =>
+          state.set([item], { progress }),
+        )
+        state.set([item], {
+          status: 'ok',
+          reason: 'result.copied',
+          added,
+          omitted,
+          progress: undefined,
+        })
       }
     } catch (error) {
       if (isAbort(error, signal) || error instanceof AuthLostError) throw error
-      state.set([item], { status: 'failed', reason: reasonOf(error) })
+      state.set([item], { status: 'failed', reason: reasonOf(error), progress: undefined })
     }
   }
 }
@@ -225,11 +244,15 @@ async function copyPlaylist(
   item: LibraryItem,
   source: SpotifyApi,
   target: SpotifyApi,
-  signal?: AbortSignal,
+  signal: AbortSignal | undefined,
+  onProgress: (progress: CopyProgress) => void,
 ) {
-  const entries = await fetchAllOffset((o) => source.playlistItems(item.id, o, signal), undefined, {
-    signal,
-  })
+  onProgress({ phase: 'reading', done: 0, total: item.playlist?.itemCount ?? 0 })
+  const entries = await fetchAllOffset(
+    (o) => source.playlistItems(item.id, o, signal),
+    (done, total) => onProgress({ phase: 'reading', done, total }),
+    { signal },
+  )
   const uris: string[] = []
   let omitted = 0
   for (const entry of entries) {
@@ -242,6 +265,7 @@ async function copyPlaylist(
     }
   }
 
+  onProgress({ phase: 'creating' })
   const created = await target.createPlaylist(
     {
       name: item.name,
@@ -250,8 +274,12 @@ async function copyPlaylist(
     },
     signal,
   )
+  let done = 0
+  onProgress({ phase: 'adding', done, total: uris.length })
   for (const part of chunk(uris, LIMITS.addPlaylistItems)) {
     await target.addPlaylistItems(created.id, part, signal)
+    done += part.length
+    onProgress({ phase: 'adding', done, total: uris.length })
   }
   return { added: uris.length, omitted }
 }
