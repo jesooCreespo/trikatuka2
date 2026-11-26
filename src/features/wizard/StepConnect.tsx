@@ -190,19 +190,19 @@ export function StepConnect() {
         </p>
       )}
 
-      <div className="flex justify-end">
-        <Button onClick={() => goTo('select')} disabled={!canSwap}>
-          {t('connect.continue')}
-          <ArrowRight />
-        </Button>
-      </div>
-
       <div className="bg-card flex gap-3 rounded-lg border p-4 text-sm">
         <Info className="text-primary mt-0.5 size-4 shrink-0" aria-hidden />
         <div className="space-y-1">
           <p className="font-medium">{t('connect.tipTitle')}</p>
           <p className="text-muted-foreground">{t('connect.tip')}</p>
         </div>
+      </div>
+
+      <div className="flex justify-end">
+        <Button onClick={() => goTo('select')} disabled={!canSwap}>
+          {t('connect.continue')}
+          <ArrowRight />
+        </Button>
       </div>
     </div>
   )
