@@ -112,7 +112,7 @@ export function StepReport() {
                     </p>
                   </div>
                   <Badge variant={r.status === 'failed' ? 'destructive' : 'secondary'}>
-                    {t(`status.${r.status}`)}
+                    {t(r.status === 'failed' ? 'itemStatus.failed' : 'itemStatus.cancelled')}
                   </Badge>
                 </li>
               ))}

@@ -11,6 +11,15 @@ albums, followed artists and podcasts.
 
 How to: https://aknowakowski.blogspot.com/p/trikatuka2.html
 
+## Screenshots
+
+| Choose what to transfer                                                                     | Report                                                                         |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| ![Choosing playlists to transfer](docs/screenshots/en-light-desktop-2-select-playlists.png) | ![Transfer report in dark mode](docs/screenshots/en-dark-desktop-6-report.png) |
+
+More in [docs/screenshots](docs/screenshots/), in English and Italian, light and dark, desktop
+and mobile. They show a made-up library and are regenerated with `npm run screenshots`.
+
 ## For developers
 
 Stack: React 19, TypeScript, Vite, Tailwind CSS 4, shadcn/ui, TanStack Query, Zustand,
@@ -46,6 +55,7 @@ npm run typecheck
 npm run format       # Prettier
 npm test             # unit tests (Vitest)
 npm run test:e2e     # end-to-end tests (Playwright, fake Spotify; builds first)
+npm run screenshots  # regenerate docs/screenshots/ (demo library, all languages/themes)
 ```
 
 The first time, install the Playwright browser with `npx playwright install chromium`.

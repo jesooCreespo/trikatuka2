@@ -131,6 +131,10 @@
     "failed": "Falliti",
     "cancelled": "Non trasferiti"
   },
+  "itemStatus": {
+    "failed": "Fallito",
+    "cancelled": "Non trasferito"
+  },
   "result": {
     "alreadyInLibrary": "Già presente nel nuovo account",
     "forbidden": "Spotify ha rifiutato la richiesta",

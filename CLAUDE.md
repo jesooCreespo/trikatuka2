@@ -55,7 +55,7 @@ Run commands from Git Bash or PowerShell; no POSIX-only scripts are needed.
 
 **Dev/prod parity**: Spotify allows `http` redirect URIs only on loopback IPs, so dev runs on `127.0.0.1:5173` (not `localhost`), with redirect `http://127.0.0.1:5173/afterLogin`. A Vite plugin in `vite.config.ts` rewrites `/afterLogin` → `afterLogin.html` like `firebase.json` does in production. Static files (privacy policy, favicon) live in `static/` (Vite `publicDir`; `public/` is gitignored).
 
-**E2E tests** (`e2e/`) run against an in-memory fake Spotify (`e2e/fake-spotify.ts`) installed with `context.route`, including the OAuth popup flow; extend it when adding endpoints.
+**E2E tests** (`e2e/`) run against an in-memory fake Spotify (`e2e/fake-spotify.ts`) installed with `context.route`, including the OAuth popup flow; extend it when adding endpoints. `npm run screenshots` (`screenshots/`, own Playwright config) reuses it with a made-up demo library (`screenshots/demo-library.ts`: invented names, generated SVG covers on a `.invalid` domain, two forced failures) and writes `docs/screenshots/`. Regenerate them after visible UI changes.
 
 ## Versioning
 
