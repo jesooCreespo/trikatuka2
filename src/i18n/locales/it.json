@@ -106,10 +106,13 @@
     "title": "Trasferimento in corso…",
     "subtitle": "Tieni aperta questa scheda. Puoi fermarti quando vuoi: ciò che è già fatto resta.",
     "overall": "{{done}} di {{total}}",
+    "overallLabel": "Avanzamento complessivo",
     "stop": "Ferma",
     "stopping": "Arresto in corso…",
     "current": "Ora: {{name}}",
-    "preparing": "Preparazione…"
+    "preparing": "Preparazione…",
+    "keepOrderTitle": "I brani piaciuti vengono salvati uno alla volta",
+    "keepOrderNote": "È lento di proposito, così i brani piaciuti mantengono il loro ordine. Tieni aperta questa scheda e non mettere il computer in sospensione; nel frattempo puoi usare altre schede."
   },
   "report": {
     "titleDone": "Trasferimento completato",

@@ -102,10 +102,13 @@
     "title": "Transferring…",
     "subtitle": "Keep this tab open. You can stop at any time; what's done stays done.",
     "overall": "{{done}} of {{total}}",
+    "overallLabel": "Overall progress",
     "stop": "Stop",
     "stopping": "Stopping…",
     "current": "Now: {{name}}",
-    "preparing": "Preparing…"
+    "preparing": "Preparing…",
+    "keepOrderTitle": "Liked songs are saved one at a time",
+    "keepOrderNote": "This is slow on purpose, so your liked songs keep their order. Keep this tab open and don't let your computer go to sleep; you can use other tabs in the meantime."
   },
   "report": {
     "titleDone": "Transfer finished",
