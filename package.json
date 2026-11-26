@@ -41,7 +41,6 @@
     "@angular/cli": "^22.3.0",
     "@angular/compiler-cli": "^22.3.0",
     "@playwright/test": "^1.65.1",
-    "@spartan-ng/cli": "^1.10.1",
     "@tailwindcss/postcss": "^4.3.5",
     "jsdom": "^31.0.1",
     "postcss": "^8.5.33",
@@ -56,7 +55,6 @@
     "@parcel/watcher": false,
     "esbuild": false,
     "lmdb": false,
-    "msgpackr-extract": false,
-    "nx": false
+    "msgpackr-extract": false
   }
 }
