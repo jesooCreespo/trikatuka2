@@ -1,13 +1,17 @@
 import { inject, Service, signal } from '@angular/core';
 import { runTransfer, type ItemResult } from '@/transfer/engine';
 import { I18n } from '@/i18n/i18n';
+import { workerSleep } from '@/lib/timers/worker-sleep';
+import { keepScreenAwake } from '@/lib/wake-lock';
 import { Session } from './session';
 import { Toasts } from './toasts';
 import { Wizard } from './wizard';
 
 /**
  * Runs a transfer outside any component, so navigation or re-renders can't restart or orphan it.
- * Progress is pushed to the wizard store at most every 150 ms.
+ * Progress is pushed to the wizard store at most every 150 ms. While it runs, the screen is kept
+ * awake (when the browser allows it) and the pauses between writes run in a worker, so they aren't
+ * throttled when the tab is in the background.
  */
 @Service()
 export class RunController {
@@ -31,6 +35,7 @@ export class RunController {
     this.wizard.goTo('run');
 
     const updates = throttled((r: ItemResult[]) => this.wizard.setResults(r));
+    const releaseWakeLock = keepScreenAwake();
     try {
       const results = await runTransfer(this.wizard.selectedItems(), this.wizard.options(), {
         source: this.session.api('old'),
@@ -39,6 +44,7 @@ export class RunController {
         targetUserId: target.profile.id,
         signal: this.controller.signal,
         onUpdate: updates.push,
+        sleep: workerSleep,
       });
       updates.flush();
       this.wizard.setResults(results);
@@ -46,6 +52,7 @@ export class RunController {
       updates.flush();
       this.toasts.error(error instanceof Error ? error.message : String(error));
     } finally {
+      releaseWakeLock();
       this.controller = null;
       this.running.set(false);
       this.stopping.set(false);

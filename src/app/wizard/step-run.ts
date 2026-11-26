@@ -63,7 +63,11 @@ function progressOf(results: ItemResult[]) {
               {{ i18n.t('run.overall', { done: progress().done, total: progress().total }) }}
             </span>
           </div>
-          <hlm-progress [value]="percent(progress().done, progress().total)" class="h-3">
+          <hlm-progress
+            [value]="percent(progress().done, progress().total)"
+            [attr.aria-label]="i18n.t('run.overallLabel')"
+            class="h-3"
+          >
             <hlm-progress-indicator />
           </hlm-progress>
         </div>
@@ -80,12 +84,26 @@ function progressOf(results: ItemResult[]) {
                   {{ i18n.t('run.overall', { done: row.done, total: row.total }) }}
                 </span>
               </div>
-              <hlm-progress [value]="percent(row.done, row.total)" class="h-1.5">
+              <hlm-progress
+                [value]="percent(row.done, row.total)"
+                [attr.aria-label]="i18n.t('categories.' + row.category)"
+                class="h-1.5"
+              >
                 <hlm-progress-indicator />
               </hlm-progress>
             </li>
           }
         </ul>
+
+        @if (slowByDesign()) {
+          <div class="flex gap-3 rounded-lg border p-4 text-sm">
+            <ng-icon name="lucideInfo" class="text-primary mt-0.5 shrink-0" aria-hidden="true" />
+            <div class="space-y-1">
+              <p class="font-medium">{{ i18n.t('run.keepOrderTitle') }}</p>
+              <p class="text-muted-foreground">{{ i18n.t('run.keepOrderNote') }}</p>
+            </div>
+          </div>
+        }
 
         <div class="flex justify-end">
           <button hlmBtn variant="outline" (click)="run.stop()" [disabled]="run.stopping()">
@@ -107,6 +125,10 @@ export class StepRun {
   protected readonly run = inject(RunController);
   private readonly wizard = inject(Wizard);
   protected readonly progress = computed(() => progressOf(this.wizard.results()));
+  /** "Keep order" saves liked songs one per second: tell the user why it is slow. */
+  protected readonly slowByDesign = computed(
+    () => this.wizard.options().keepOrder && (this.wizard.selectedItems().tracks?.length ?? 0) > 0,
+  );
 
   protected percent(done: number, total: number) {
     return total ? (done / total) * 100 : 0;
