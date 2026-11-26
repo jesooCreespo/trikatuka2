@@ -1,0 +1,8 @@
+dist
+public
+coverage
+playwright-report
+test-results
+package-lock.json
+static/privacypolicy.html
+.claude/skills
