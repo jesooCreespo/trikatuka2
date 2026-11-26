@@ -161,6 +161,9 @@
     "privacy": "Informativa sulla privacy",
     "back": "Torna al trasferimento"
   },
+  "privacy": {
+    "englishOnly": "Questa informativa è disponibile solo in inglese."
+  },
   "footer": {
     "by": "Trikatuka v{{version}} di",
     "beer": "Offrimi una birra",

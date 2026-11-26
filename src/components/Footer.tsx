@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router'
 
 export function Footer() {
   const { t } = useTranslation()
@@ -24,14 +25,9 @@ export function Footer() {
         >
           {t('footer.beer')}
         </a>
-        <a
-          className="underline-offset-4 hover:underline"
-          href="/privacypolicy.html"
-          target="_blank"
-          rel="noreferrer"
-        >
+        <Link className="underline-offset-4 hover:underline" to="/privacy">
           {t('footer.privacy')}
-        </a>
+        </Link>
         <span className="sm:ml-auto">{t('footer.disclaimer')}</span>
       </div>
     </footer>

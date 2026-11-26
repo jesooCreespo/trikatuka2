@@ -21,6 +21,7 @@ const SHOTS = [
   '4-review',
   '5-transfer',
   '6-report',
+  '7-privacy',
 ] as const
 type Shot = (typeof SHOTS)[number]
 
@@ -155,6 +156,11 @@ for (const flow of FLOWS) {
     // 6. Report: two followed playlists are refused on purpose, some items are skipped.
     await page.getByRole('heading', { name: t('report.titleIssues') }).waitFor({ timeout: 90_000 })
     await shot('6-report')
+
+    // 7. Privacy policy, now a page of the app.
+    await page.getByRole('link', { name: t('footer.privacy') }).click()
+    await page.getByRole('heading', { name: 'Privacy Policy', level: 1 }).waitFor()
+    await shot('7-privacy')
 
     await context.close()
   })

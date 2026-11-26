@@ -8,6 +8,7 @@ import { Header } from '@/components/Header'
 import { Wizard } from '@/features/wizard/Wizard'
 
 const Help = lazy(() => import('@/pages/Help').then((m) => ({ default: m.Help })))
+const Privacy = lazy(() => import('@/pages/Privacy').then((m) => ({ default: m.Privacy })))
 
 export function App() {
   const { t } = useTranslation()
@@ -32,6 +33,16 @@ export function App() {
                 </Suspense>
               }
             />
+            <Route
+              path="/privacy"
+              element={
+                <Suspense fallback={null}>
+                  <Privacy />
+                </Suspense>
+              }
+            />
+            {/* Old address of the policy, possibly linked from elsewhere. */}
+            <Route path="/privacypolicy.html" element={<Navigate to="/privacy" replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>

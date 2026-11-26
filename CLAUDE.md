@@ -53,7 +53,7 @@ Run commands from Git Bash or PowerShell; no POSIX-only scripts are needed.
 
 **i18n**: every user-facing string lives in `src/i18n/locales/<code>.json`. `src/i18n/index.ts` discovers locale files with `import.meta.glob` (no registry to edit): `en` is bundled (fallback), every other language is a lazy chunk; the app renders only after the detected language is loaded (`i18nReady` in `main.tsx`). Language names come from `Intl.DisplayNames`; browser locales map to the closest file via `pickLanguage`. `src/i18n/i18n.test.ts` is the gatekeeper for every locale file: same keys and placeholders as `en.json`, exactly the plural forms `Intl.PluralRules` says the language needs (Italian needs `_many` too), no HTML/URLs, no `__proto__`-style keys. Never render translations as HTML (`dangerouslySetInnerHTML`, `<Trans>` with tags) and never put links in them: hrefs stay in code. Engine results carry i18n keys (`result.*`) or raw Spotify messages as `reason`.
 
-**Dev/prod parity**: Spotify allows `http` redirect URIs only on loopback IPs, so dev runs on `127.0.0.1:5173` (not `localhost`), with redirect `http://127.0.0.1:5173/afterLogin`. A Vite plugin in `vite.config.ts` rewrites `/afterLogin` → `afterLogin.html` like `firebase.json` does in production. Static files (privacy policy, favicon) live in `static/` (Vite `publicDir`; `public/` is gitignored).
+**Dev/prod parity**: Spotify allows `http` redirect URIs only on loopback IPs, so dev runs on `127.0.0.1:5173` (not `localhost`), with redirect `http://127.0.0.1:5173/afterLogin`. A Vite plugin in `vite.config.ts` rewrites `/afterLogin` → `afterLogin.html` like `firebase.json` does in production. Static files (favicon) live in `static/` (Vite `publicDir`; `public/` is gitignored).
 
 **E2E tests** (`e2e/`) run against an in-memory fake Spotify (`e2e/fake-spotify.ts`) installed with `context.route`, including the OAuth popup flow; extend it when adding endpoints. `npm run screenshots` (`screenshots/`, own Playwright config) reuses it with a made-up demo library (`screenshots/demo-library.ts`: invented names, generated SVG covers on a `.invalid` domain, two forced failures) and writes `docs/screenshots/`. Regenerate them after visible UI changes.
 
@@ -64,3 +64,7 @@ SemVer + [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Every user-vi
 ## Skills
 
 `.claude/skills/react-best-practices/` (Vercel, MIT; source in `SOURCE.txt`) — performance rules for React. The `server-*` and Next.js-specific rules don't apply to this SPA.
+
+## Privacy policy
+
+`src/pages/Privacy.tsx` (route `/privacy`; `/privacypolicy.html` redirects there in the app and in `firebase.json`). It is the owner's legal text: keep it verbatim and English-only, and change the wording only when the owner asks.

@@ -84,6 +84,22 @@ test('switches language from the menu, loading it on demand, and remembers it', 
   await expect(page.getByRole('heading', { name: 'Collega il tuo account vecchio' })).toBeVisible()
 })
 
+test('shows the privacy policy inside the app, also from its old address', async ({ browser }) => {
+  const context = await browser.newContext({ locale: 'it-IT' })
+  const page = await context.newPage()
+  await page.goto('/')
+  await page.getByRole('link', { name: 'Privacy' }).click()
+  await expect(page).toHaveURL('/privacy')
+  await expect(page.getByRole('heading', { name: 'Privacy Policy', level: 1 })).toBeVisible()
+  // The app's own header and the note about the English-only text are there.
+  await expect(page.getByRole('banner')).toBeVisible()
+  await expect(page.getByText('Questa informativa è disponibile solo in inglese.')).toBeVisible()
+
+  await page.goto('/privacypolicy.html')
+  await expect(page).toHaveURL('/privacy')
+  await context.close()
+})
+
 test('the help page and the OAuth callback route are served', async ({ page }) => {
   await page.goto('/help')
   await expect(page.getByRole('heading', { name: 'How Trikatuka works' })).toBeVisible()

@@ -37,6 +37,8 @@ configuration and the UI flow all change.
   `POST /me/playlists` for creating playlists.
 - Playlist copies keep their description.
 - The login popup now hands tokens to the app with a same-origin `postMessage`.
+- The privacy policy is a page of the app (`/privacy`), with its header, theme and language
+  menu. The old `/privacypolicy.html` address redirects to it. The text is unchanged.
 - The Spotify client ID is configured with `VITE_SPOTIFY_CLIENT_ID` (`.env.*` files).
 - Local development runs on `http://127.0.0.1:5173` with no self-signed certificate.
 - The version shown in the footer comes from `package.json`.

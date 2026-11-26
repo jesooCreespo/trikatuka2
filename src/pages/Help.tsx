@@ -55,14 +55,9 @@ export function Help() {
       </div>
 
       <p className="text-sm">
-        <a
-          className="text-primary underline-offset-4 hover:underline"
-          href="/privacypolicy.html"
-          target="_blank"
-          rel="noreferrer"
-        >
+        <Link className="text-primary underline-offset-4 hover:underline" to="/privacy">
           {t('help.privacy')}
-        </a>
+        </Link>
       </p>
     </div>
   )

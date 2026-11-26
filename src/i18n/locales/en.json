@@ -157,6 +157,9 @@
     "privacy": "Privacy policy",
     "back": "Back to the transfer"
   },
+  "privacy": {
+    "englishOnly": "This policy is available in English only."
+  },
   "footer": {
     "by": "Trikatuka v{{version}} by",
     "beer": "Buy me a beer",
