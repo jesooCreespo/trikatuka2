@@ -14,6 +14,8 @@ interface SessionState {
   setAccount: (slot: Slot, account: Account) => void
   setAuth: (slot: Slot, auth: AuthData) => void
   signOut: (slot: Slot) => void
+  /** Exchanges the two accounts, with their tokens: no new login. */
+  swap: () => void
 }
 
 /** Connected accounts. Kept in sessionStorage (per tab, cleared when the tab closes). */
@@ -27,6 +29,7 @@ export const useSession = create<SessionState>()(
           const account = s.accounts[slot]
           return account ? { accounts: { ...s.accounts, [slot]: { ...account, auth } } } : s
         }),
+      swap: () => set(({ accounts }) => ({ accounts: { old: accounts.new, new: accounts.old } })),
       signOut: (slot) =>
         set((s) => {
           const accounts = { ...s.accounts }

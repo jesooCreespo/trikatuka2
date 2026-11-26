@@ -49,7 +49,7 @@ export function StepSelect() {
       </Tabs>
 
       <div className="bg-background/90 sticky bottom-0 -mx-4 flex items-center justify-between gap-3 border-t px-4 py-3 backdrop-blur">
-        <Button variant="ghost" onClick={() => goTo('connect-new')}>
+        <Button variant="ghost" onClick={() => goTo('connect')}>
           <ArrowLeft />
           {t('connect.back')}
         </Button>

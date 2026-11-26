@@ -11,8 +11,7 @@
     "skipToContent": "Skip to content"
   },
   "steps": {
-    "connect-old": "Old account",
-    "connect-new": "New account",
+    "connect": "Accounts",
     "select": "Choose",
     "review": "Review",
     "run": "Transfer",
@@ -20,9 +19,7 @@
     "progress": "Step {{current}} of {{total}}"
   },
   "connect": {
-    "oldTitle": "Connect your old account",
     "oldBody": "This is the account you're moving away from. Trikatuka only reads from it.",
-    "newTitle": "Connect your new account",
     "newBody": "This is where your library will be added. Nothing is removed from either account.",
     "signIn": "Sign in with Spotify",
     "signingIn": "Waiting for Spotify…",
@@ -35,7 +32,13 @@
     "popupClosed": "The login window was closed before finishing.",
     "loginFailed": "Sign-in failed: {{message}}",
     "continue": "Continue",
-    "back": "Back"
+    "back": "Back",
+    "title": "Connect your accounts",
+    "body": "Sign in with the account you're moving from and the one you're moving to. Nothing is removed from either account.",
+    "oldCard": "From: old account",
+    "newCard": "To: new account",
+    "swap": "Swap accounts",
+    "swapped": "Accounts swapped: from {{from}} to {{to}}"
   },
   "categories": {
     "playlists": "Playlists",

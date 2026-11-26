@@ -2,8 +2,9 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import { CATEGORIES, type Category, type LibraryItem } from '@/lib/library'
 import type { ItemResult, TransferOptions } from '@/transfer/engine'
+import { useSession } from './session'
 
-export const STEPS = ['connect-old', 'connect-new', 'select', 'review', 'run', 'report'] as const
+export const STEPS = ['connect', 'select', 'review', 'run', 'report'] as const
 export type Step = (typeof STEPS)[number]
 
 type SelectionMap = Record<Category, Record<string, LibraryItem>>
@@ -11,12 +12,19 @@ type SelectionMap = Record<Category, Record<string, LibraryItem>>
 const emptySelection = (): SelectionMap =>
   Object.fromEntries(CATEGORIES.map((c) => [c, {}])) as unknown as SelectionMap
 
+const currentSource = () => useSession.getState().accounts.old?.profile.id ?? ''
+
 interface WizardState {
   step: Step
-  /** Selected items per category, keyed by id so selection survives paging and filtering. */
+  /**
+   * Selections per source account id. Swapping the accounts changes the source; swapping back
+   * finds the previous selection again.
+   */
+  selections: Record<string, SelectionMap>
+  /** The current source's selection (kept in sync with `selections`), as components read it. */
   selection: SelectionMap
   options: TransferOptions
-  /** Results of the last (or current) run. Not persisted. */
+  /** Results of the last (or current) run. */
   results: ItemResult[]
   goTo: (step: Step) => void
   toggle: (item: LibraryItem, selected?: boolean) => void
@@ -26,13 +34,21 @@ interface WizardState {
   setResults: (results: ItemResult[]) => void
   /** Re-select only the failed/cancelled items of the last run, for a retry. */
   selectRetryable: () => void
-  reset: () => void
+  /** Shows the selection of the current source account (after a swap or a new login). */
+  syncSource: () => void
 }
+
+/** Updates the current selection and remembers it for the current source account. */
+const withSelection = (s: WizardState, selection: SelectionMap) => ({
+  selection,
+  selections: { ...s.selections, [currentSource()]: selection },
+})
 
 export const useWizard = create<WizardState>()(
   persist(
     (set, get) => ({
-      step: 'connect-old',
+      step: 'connect',
+      selections: {},
       selection: emptySelection(),
       options: { keepOrder: false, skipDuplicates: true },
       results: [],
@@ -43,7 +59,7 @@ export const useWizard = create<WizardState>()(
           const shouldSelect = selected ?? !current[item.id]
           if (shouldSelect) current[item.id] = item
           else delete current[item.id]
-          return { selection: { ...s.selection, [item.category]: current } }
+          return withSelection(s, { ...s.selection, [item.category]: current })
         }),
       setSelected: (category, items, selected) =>
         set((s) => {
@@ -52,9 +68,9 @@ export const useWizard = create<WizardState>()(
             if (selected) current[item.id] = item
             else delete current[item.id]
           }
-          return { selection: { ...s.selection, [category]: current } }
+          return withSelection(s, { ...s.selection, [category]: current })
         }),
-      clearSelection: () => set({ selection: emptySelection() }),
+      clearSelection: () => set((s) => withSelection(s, emptySelection())),
       setOption: (key, value) => set((s) => ({ options: { ...s.options, [key]: value } })),
       setResults: (results) => set({ results }),
       selectRetryable: () => {
@@ -64,17 +80,20 @@ export const useWizard = create<WizardState>()(
             selection[r.item.category][r.item.id] = r.item
           }
         }
-        set({ selection })
+        set((s) => withSelection(s, selection))
       },
-      reset: () => set({ step: 'connect-old', selection: emptySelection(), results: [] }),
+      syncSource: () =>
+        set((s) => ({ selection: s.selections[currentSource()] ?? emptySelection() })),
     }),
     {
       name: 'trikatuka:wizard',
-      version: 1,
+      // v2: one "connect" step and selections per source account.
+      version: 2,
       storage: createJSONStorage(() => sessionStorage),
       partialize: (s) => ({
         // A run can't survive a reload, so never come back to the "run" step.
         step: s.step === 'run' ? 'report' : s.step,
+        selections: s.selections,
         selection: s.selection,
         options: s.options,
         results: s.results.map((r) =>
@@ -86,6 +105,13 @@ export const useWizard = create<WizardState>()(
     },
   ),
 )
+
+// Follow the source account: after a swap or a login, show that account's selection.
+useSession.subscribe((state, previous) => {
+  if (state.accounts.old?.profile.id !== previous.accounts.old?.profile.id) {
+    useWizard.getState().syncSource()
+  }
+})
 
 export function selectedItems(selection: SelectionMap): Partial<Record<Category, LibraryItem[]>> {
   return Object.fromEntries(CATEGORIES.map((c) => [c, Object.values(selection[c])]))

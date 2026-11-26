@@ -12,8 +12,7 @@ import { StepSelect } from './StepSelect'
 /** The step that is actually allowed, given which accounts are connected. */
 function allowedStep(step: Step, hasOld: boolean, hasNew: boolean, running: boolean): Step {
   if (running) return 'run'
-  if (!hasOld) return 'connect-old'
-  if (!hasNew && step !== 'connect-old') return 'connect-new'
+  if (!hasOld || !hasNew) return 'connect'
   if (step === 'run') return 'report'
   return step
 }
@@ -37,8 +36,7 @@ export function Wizard() {
   return (
     <div className="space-y-8">
       <Stepper current={current} />
-      {current === 'connect-old' && <StepConnect slot="old" />}
-      {current === 'connect-new' && <StepConnect slot="new" />}
+      {current === 'connect' && <StepConnect />}
       {current === 'select' && <StepSelect />}
       {current === 'review' && <StepReview />}
       {current === 'run' && <StepRun />}
